@@ -100,6 +100,8 @@ The `mcp` container runs only the Go MCP and official tunnel components. The con
 
 These paths are excluded from Git and image build context. `current` is a relative symlink; credential references point to a specific generation. Failed reinitialization does not replace the active configuration. Back up the entire `data/` directory, preserving permissions and symlinks. Older generations remain available to running processes.
 
+On native Linux, bind mounts preserve numeric ownership. Give runtime UID/GID 1000 write access to the dedicated host workspace; for a newly created `./workspace`, `sudo chown 1000:1000 ./workspace` sets its owner. Apply an appropriate ACL instead when ownership must stay with another host account. Existing files retain their own permissions. Protected configuration generations may require elevated host permissions to back up or remove; do not make credentials world-readable. Docker Desktop file sharing can behave differently.
+
 Optionally copy `.env.example` to `.env` and set `TUNNEL_SSH_CONFIG_DIR`, `TUNNEL_SSH_INIT_INPUT_DIR` and `TUNNEL_SSH_WORKSPACE_DIR` to change host paths. Initialization and runtime must share the same configuration directory, mounted at `/etc/tunnel-ssh` in both. Do not put secrets in `.env`.
 
 Use `TUNNEL_SSH_MCP_IMAGE` and `TUNNEL_SSH_DEV_IMAGE` to give acceptance builds separate image tags; default tags remain `go-tunnel-ssh-mcp:latest` and `go-tunnel-ssh-dev:latest`. Set the MCP tag consistently for initialization and runtime.

@@ -23,6 +23,8 @@ make docker-build docker-test
 
 `make vuln` 检查已知且可达的 Go 漏洞，`make secrets` 脱敏扫描 Git 历史。工具版本固定在 Makefile 中，安装及查询数据库需要网络；它们不能替代人工审查。依赖变化后运行 `make tidy` 并提交两个模块文件。CI 包含 macOS/Linux 竞态测试、构建、文档检查、凭据／依赖扫描及 Linux Docker 集成，不使用真实隧道凭据。
 
+Docker 测试使用私有临时工作目录；短暂运行的 root 容器为夹具设置运行账户 UID/GID 1000，并在清理前恢复宿主机调用用户的归属。这支持用户编号与镜像不同的原生 Linux 宿主机，不修改正式部署路径。
+
 ## 修改流程
 
 1. 修复前先复现缺陷；有实质行为变化时添加回归测试。

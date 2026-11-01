@@ -99,6 +99,8 @@ cd ChatGPT_Tunnel_SSH
 
 上述目录已排除在 Git 和镜像构建上下文之外。`current` 是相对符号链接，凭据引用固定到其代次，重新初始化失败不会替换已有配置。备份配置时保存整个 `data/`，并保留权限和符号链接。旧代次保留，以便运行中的进程继续读取原凭据。
 
+原生 Linux 的挂载保留数字用户归属。需授予运行账户 UID/GID 1000 对专用宿主机工作目录的写权限；对于新建的 `./workspace`，可执行 `sudo chown 1000:1000 ./workspace` 设置归属。若必须保留其他宿主机账户的所有权，应使用适当的 ACL。已有文件保留各自权限。受保护的配置代次可能需要宿主机提权才能备份或删除，不要把凭据改为所有人可读；Docker Desktop 文件共享的行为可能不同。
+
 可选复制 `.env.example` 为 `.env`，通过 `TUNNEL_SSH_CONFIG_DIR`、`TUNNEL_SSH_INIT_INPUT_DIR`、`TUNNEL_SSH_WORKSPACE_DIR` 更改宿主机目录。初始化与运行必须使用同一配置目录，容器内均固定挂载为 `/etc/tunnel-ssh`。不要在 `.env` 中填写密钥。
 
 可通过 `TUNNEL_SSH_MCP_IMAGE` 和 `TUNNEL_SSH_DEV_IMAGE` 为验收构建指定独立镜像标签；默认仍为 `go-tunnel-ssh-mcp:latest` 和 `go-tunnel-ssh-dev:latest`。初始化与运行须使用相同 MCP 标签。

@@ -21,6 +21,8 @@ make docker-build docker-test
 
 Use separate image tags when a formal deployment exists. Tests create temporary containers and volumes, use stdio and synthetic credentials, and clean up their own resources. Never run `down -v` against a deployment with data you need.
 
+Docker tests use private temporary workspaces. A short-lived root container assigns runtime UID/GID 1000 to those fixtures and restores the invoking host user's ownership before cleanup. This supports native Linux hosts whose user ID differs from the image; it never changes formal deployment paths.
+
 Run `make vuln` for known reachable Go vulnerabilities and `make secrets` to scan Git history with redacted output. These tools are version-pinned in the Makefile and require network access for installation/database queries. They do not replace manual review. Run `make tidy` after dependency changes and include both module files. CI runs macOS/Linux race tests, builds, documentation checks, secret/dependency scans and Linux Docker integration; it never uses real tunnel credentials.
 
 ## Change process

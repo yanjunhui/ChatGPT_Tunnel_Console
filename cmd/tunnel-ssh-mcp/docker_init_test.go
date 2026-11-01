@@ -34,6 +34,7 @@ func newDockerInitRig(t *testing.T) dockerInitRig {
 			t.Fatal(err)
 		}
 	}
+	prepareDockerFixture(t, dir, filepath.Join(dir, "workspace"))
 	t.Cleanup(func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
@@ -130,8 +131,10 @@ if touch /etc/tunnel-ssh/write-test 2>/dev/null; then exit 1; fi
 	if err != nil || filepath.IsAbs(target) {
 		t.Fatal("host cannot resolve config generation", err)
 	}
-	if _, err := os.Stat(filepath.Join(r.data, "current", "config.toml")); err != nil {
-		t.Fatal("host configuration missing", err)
+	// Private config was checked inside MCP; host UID may differ from runtime UID.
+	// 中文：私有配置已在 MCP 内验证；宿主机用户身份可能与运行用户不同。
+	if info, err := os.Stat(filepath.Join(r.data, target)); err != nil || !info.IsDir() {
+		t.Fatal("host configuration generation missing", err)
 	}
 }
 

@@ -19,6 +19,9 @@ func TestDockerOpenSSH(t *testing.T) {
 	if os.Getenv("TUNNEL_SSH_DOCKER_TEST") != "1" {
 		t.Skip("set TUNNEL_SSH_DOCKER_TEST=1 after building Docker images")
 	}
+	workspace := t.TempDir()
+	prepareDockerFixture(t, workspace, workspace)
+	t.Setenv("TUNNEL_SSH_TEST_WORKSPACE_DIR", workspace)
 	root, err := filepath.Abs("../..")
 	if err != nil {
 		t.Fatal(err)

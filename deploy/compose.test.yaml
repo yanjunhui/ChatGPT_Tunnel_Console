@@ -7,7 +7,7 @@ services:
     image: ${TUNNEL_SSH_DEV_IMAGE:-go-tunnel-ssh-dev:latest}
     hostname: go-ssh-test
     volumes:
-      - ../.cache/docker-workspace:/workspace
+      - ${TUNNEL_SSH_TEST_WORKSPACE_DIR:-../.cache/docker-workspace}:/workspace
       - test_home:/home/developer
       - test_identity:/var/lib/tunnel-ssh
     healthcheck:
@@ -20,7 +20,7 @@ services:
     command: ["serve", "--config", "/etc/tunnel-ssh/config.toml"]
     volumes:
       - ./config.docker.toml:/etc/tunnel-ssh/config.toml:ro
-      - ../.cache/docker-workspace:/workspace
+      - ${TUNNEL_SSH_TEST_WORKSPACE_DIR:-../.cache/docker-workspace}:/workspace
       - test_identity:/var/lib/tunnel-ssh:ro
 volumes:
   test_home:

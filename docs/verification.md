@@ -173,7 +173,8 @@ Date: 2026-11-01 (Asia/Shanghai). This review prepares the public MIT source rep
 | CLI defect reproduction | Five subcommands originally returned exit 1 for `--help`; the regression failed before the fix and passed afterward. All six flag-based subcommands now return exit 0. |
 | Local tests and builds | Full race suite, `go vet`, native build, Linux arm64/amd64 cross-builds and module tidy passed on macOS arm64 with Go 1.26.10. |
 | Docker acceptance | Both opt-in tests passed with separate `public-0.1.2` image tags: initialization, wizard, persistence/permissions, real OpenSSH, PTY state and SFTP round trips. Test containers and volumes were removed. |
-| Documentation and source checks | 26 documents in 13 bilingual pairs passed link/example/hash checks; 46 Go files passed public-comment, bilingual-comment and function-length checks. |
+| Documentation and source checks | 26 documents in 13 bilingual pairs passed link/example/hash checks; 47 Go files passed public-comment, bilingual-comment and function-length checks. |
+| Clean checkout and Linux ownership | CI reproduced a missing build temporary directory, then native-Linux fixture ownership failures. The build now prepares its directory; Docker fixtures grant UID 1000 workspace access and restore host ownership on cleanup. Configuration remains private. |
 | Reachable vulnerability scan | govulncheck v1.9.0 reports no reachable or imported-package vulnerabilities after raising the toolchain from 1.26.0 to 1.26.10. |
 | Module-only advisory | GO-2026-5932 concerns the unmaintained `golang.org/x/crypto/openpgp` package. This project does not import it; the advisory has no fixed version. This is recorded rather than suppressed. |
 | Public content | Gitleaks v8.30.1 found no secrets in the staged source export. Private deployment identifiers were redacted; credentials, runtime data, binaries and raw logs are excluded. |
