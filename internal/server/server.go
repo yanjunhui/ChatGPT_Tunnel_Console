@@ -14,7 +14,7 @@ import (
 
 // Version identifies both the CLI release and the MCP server implementation.
 // 中文：Version 同时标识 CLI 版本和 MCP 服务实现版本。
-const Version = "0.3.1"
+const Version = "0.3.2"
 
 type profileInput struct {
 	Profile string `json:"profile,omitempty"`

@@ -3,6 +3,11 @@
 
 English | [简体中文](CHANGELOG.zh-CN.md)
 
+## 0.3.2 — 2026-11-01
+
+- Improve native Unicode delivery with a longer non-ASCII key delay; add multi-script real-desktop readback checks. ASCII pacing and VNC input remain unchanged.
+- Document chunking and application responsiveness limits; successful event delivery still requires result verification.
+
 ## 0.3.1 — 2026-11-01
 
 - Fix real ChatGPT screenshot visibility by omitting metadata-only structured output from both screenshot tools. Preserve PNG image content and text JSON metadata; clients using structured screenshot dimensions must read `content[1].text`.

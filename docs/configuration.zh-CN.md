@@ -3,7 +3,7 @@
 
 [English](configuration.md) | 简体中文 | [README](../README.zh-CN.md)
 
-本文描述仓库 0.3.1 的实际实现，对应代码为 `internal/config`、`internal/setup`、`internal/tunnel` 和 `cmd/tunnel-console-mcp`。示例只使用占位值，不包含真实凭据。
+本文描述仓库 0.3.2 的实际实现，对应代码为 `internal/config`、`internal/setup`、`internal/tunnel` 和 `cmd/tunnel-console-mcp`。示例只使用占位值，不包含真实凭据。
 
 ## TOML 配置
 

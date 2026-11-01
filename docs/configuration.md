@@ -3,7 +3,7 @@
 
 English | [简体中文](configuration.zh-CN.md) | [README](../README.md)
 
-This reference describes the repository's 0.3.1 implementation. See `internal/config`, `internal/setup`, `internal/tunnel` and `cmd/tunnel-console-mcp` for the corresponding code. Examples use placeholders, never real credentials.
+This reference describes the repository's 0.3.2 implementation. See `internal/config`, `internal/setup`, `internal/tunnel` and `cmd/tunnel-console-mcp` for the corresponding code. Examples use placeholders, never real credentials.
 
 ## TOML configuration
 

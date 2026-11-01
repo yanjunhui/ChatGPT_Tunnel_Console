@@ -57,7 +57,7 @@ func (m *Manager) DesktopKey(ctx context.Context, in KeyInput) (InputResult, err
 	for i, symbol := range symbols {
 		names[i] = fmt.Sprintf("0x%x", symbol)
 	}
-	command := "xdotool key --clearmodifiers --delay 12 " + shellQuote(strings.Join(names, "+"))
+	command := "xdotool key --clearmodifiers --delay " + nativeKeyDelay(strings.Join(in.Keys, "")) + " " + shellQuote(strings.Join(names, "+"))
 	return m.x11Input(ctx, in.Profile, "", func(desktop.Info) (string, error) { return command, nil })
 }
 
@@ -69,11 +69,20 @@ func (m *Manager) DesktopType(ctx context.Context, in TextInput) (InputResult, e
 		return InputResult{}, err
 	}
 	text := strings.ReplaceAll(strings.ReplaceAll(in.Text, "\r\n", "\n"), "\r", "\n")
-	// UTF-8 and normal key pacing let X11 clients consume temporary Unicode mappings.
-	// 中文：UTF-8 和正常按键间隔让 X11 应用及时读取临时 Unicode 键位映射。
+	// Older xdotool releases remove temporary Unicode mappings after delay/4.
+	// 中文：旧版 xdotool 在 delay/4 后移除临时 Unicode 映射，应用需有处理时间。
 	return m.x11Input(ctx, in.Profile, text, func(desktop.Info) (string, error) {
-		return "LC_ALL=C.UTF-8 xdotool type --clearmodifiers --delay 12 --file -", nil
+		return "LC_ALL=C.UTF-8 xdotool type --clearmodifiers --delay " + nativeKeyDelay(text) + " --file -", nil
 	})
+}
+
+func nativeKeyDelay(text string) string {
+	for _, r := range text {
+		if r > 127 {
+			return "100"
+		}
+	}
+	return "12"
 }
 
 func (m *Manager) withX11(ctx context.Context, profile string, action func(*ssh.Client, string) error) error {

@@ -3,7 +3,7 @@
 
 English | [简体中文](tool-reference.zh-CN.md) | [README](../README.md)
 
-Applies to 0.3.1. Tool registration is in `internal/server/server.go`; input/result types and operations are in `internal/remote`. JSON names below are the actual public contract. Configuration defaults are documented in [configuration.md](configuration.md).
+Applies to 0.3.2. Tool registration is in `internal/server/server.go`; input/result types and operations are in `internal/remote`. JSON names below are the actual public contract. Configuration defaults are documented in [configuration.md](configuration.md).
 
 ## Shared conventions
 

@@ -3,7 +3,7 @@
 
 [English](tool-reference.md) | 简体中文 | [README](../README.zh-CN.md)
 
-适用于 0.3.1。工具注册位于 `internal/server/server.go`，参数、返回类型和实现位于 `internal/remote`。下文 JSON 名称均为实际公共契约；配置默认值见[配置参考](configuration.zh-CN.md)。
+适用于 0.3.2。工具注册位于 `internal/server/server.go`，参数、返回类型和实现位于 `internal/remote`。下文 JSON 名称均为实际公共契约；配置默认值见[配置参考](configuration.zh-CN.md)。
 
 ## 通用约定
 

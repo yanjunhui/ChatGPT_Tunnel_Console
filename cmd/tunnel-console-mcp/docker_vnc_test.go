@@ -45,6 +45,7 @@ func TestDockerVNC(t *testing.T) {
 	ctx, c := r.vncClient(t)
 	r.must(t, false, "exec", "-T", "dev", "sh", "-c", "! command -v x11vnc && ! command -v Xtigervnc")
 	checkDesktopInput(t, ctx, c, "desktop", "NATIVE_WITHOUT_VNC")
+	checkNativeUnicode(t, ctx, c)
 	r.must(t, false, "up", "-d", "--wait", "--wait-timeout", "60", "vnc")
 	checkDesktopInput(t, ctx, c, "vnc", "VNC_WITH_NATIVE")
 	checkDesktopInput(t, ctx, c, "desktop", "NATIVE_WITH_VNC")
@@ -56,6 +57,19 @@ func TestDockerVNC(t *testing.T) {
 	}
 	checkDesktopInput(t, ctx, c, "desktop", "NATIVE_AFTER_VNC_STOP")
 	r.checkDesktopPorts(t)
+}
+
+func checkNativeUnicode(t *testing.T, ctx context.Context, c *mcp.ClientSession) {
+	t.Helper()
+	for _, value := range []string{"中文汉字测试甲乙丙丁", "独立桌面希腊αβ日文あいう"} {
+		dockerCall(t, ctx, c, "desktop-key", map[string]any{"keys": []string{"Control_L", "u"}})
+		dockerCall(t, ctx, c, "desktop-type", map[string]any{"text": "printf '" + value + "\\n' > /workspace/unicode.txt"})
+		dockerCall(t, ctx, c, "desktop-key", map[string]any{"keys": []string{"Return"}})
+		got := desktopCommand(t, ctx, c, "cat /workspace/unicode.txt")
+		if got != value+"\n" {
+			t.Fatalf("native Unicode mismatch: %q", got)
+		}
+	}
 }
 
 func checkDesktopInput(t *testing.T, ctx context.Context, c *mcp.ClientSession, backend, marker string) {

@@ -82,4 +82,4 @@ Both paths enforce 1–256 pointer events, 1–16 keys, 1–4096 Unicode charact
 
 If ChatGPT reports missing tools after an upgrade, refresh the existing app's tools in its management page and re-check discovery. Local tests and tunnel health alone do not prove ChatGPT has discovered the new schema. Do not create another tunnel supervisor with the same ID for this check.
 
-Native typing uses a 12 ms key delay so applications can consume temporary Unicode key mappings. Long text may need a larger `desktop.timeout` (up to 120 seconds).
+Native input keeps a 12 ms delay for ASCII and uses 100 ms when a call contains non-ASCII text or keys, allowing more time to consume temporary Unicode mappings. This improves delivery under short application delays, but cannot guarantee input to an unresponsive application. Verify results; do not blindly retry. Split non-ASCII text into short chunks (about 100 characters with the default timeout), or increase `desktop.timeout` up to 120 seconds. The 4096-character validation limit is not a promise that a single call finishes before its deadline.
