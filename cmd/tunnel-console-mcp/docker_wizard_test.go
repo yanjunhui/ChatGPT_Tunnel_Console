@@ -29,7 +29,7 @@ func (r dockerInitRig) checkWizard(t *testing.T) {
 	for _, step := range []struct{ prompt, answer string }{
 		{"OpenAI 隧道 ID: ", "tunnel_interactive\r"},
 		{"OpenAI 运行时 API Key（不回显）: ", "docker-interactive-secret\r"},
-		{"SSH 目标：1 自带 Docker 开发环境 / 2 外部 SSH 主机 [1]: ", "\r"},
+		{"SSH 目标：1 自带 Docker 开发环境 / 2 外部 SSH 主机 / 3 自带图形桌面 [1]: ", "\r"},
 	} {
 		awaitPrompt(t, ctx, chunks, &transcript, step.prompt)
 		time.Sleep(50 * time.Millisecond)

@@ -9,7 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/yanjunhui/ChatGPT_Tunnel_SSH/internal/tunnel"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/tunnel"
 )
 
 func copyFile(source, destination string, mode os.FileMode) error {

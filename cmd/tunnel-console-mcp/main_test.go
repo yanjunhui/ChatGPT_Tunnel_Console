@@ -11,7 +11,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/yanjunhui/ChatGPT_Tunnel_SSH/internal/testssh"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/testssh"
 )
 
 func TestStdioWorker(t *testing.T) {
@@ -44,7 +44,7 @@ func TestRealStdioProcess(t *testing.T) {
 	}
 	defer c.Close()
 	tools, err := c.ListTools(t.Context(), nil)
-	if err != nil || len(tools.Tools) != 13 {
+	if err != nil || len(tools.Tools) != 17 {
 		t.Fatalf("tool discovery: %+v %v", tools, err)
 	}
 	result, err := c.CallTool(t.Context(), &mcp.CallToolParams{Name: "run-command", Arguments: map[string]any{"command": "printf STDIO_SUCCESS"}})

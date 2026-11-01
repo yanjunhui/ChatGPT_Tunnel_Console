@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yanjunhui/ChatGPT_Tunnel_SSH/internal/config"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/config"
 )
 
 func containerFixture(t *testing.T) (ContainerInstaller, *Console, *bytes.Buffer) {
@@ -168,7 +168,7 @@ func TestContainerConcurrentAndCanceledInit(t *testing.T) {
 }
 
 func TestContainerWizardExternalAndInvalidTarget(t *testing.T) {
-	for _, target := range []string{"", "0\n", "3\n", "invalid\n"} {
+	for _, target := range []string{"", "0\n", "4\n", "invalid\n"} {
 		c := &Console{Input: strings.NewReader("tunnel_test\n" + target), Output: io.Discard, ReadSecret: func() (string, error) { return "key", nil }}
 		if _, err := containerWizard(c); err == nil {
 			t.Fatal("accepted EOF or invalid target", target)

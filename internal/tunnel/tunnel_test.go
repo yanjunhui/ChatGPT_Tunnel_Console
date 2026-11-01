@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yanjunhui/ChatGPT_Tunnel_SSH/internal/config"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/config"
 )
 
 func TestArgumentsKeepSecretsOutOfArgv(t *testing.T) {

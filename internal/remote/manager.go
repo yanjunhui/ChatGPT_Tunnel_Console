@@ -9,7 +9,7 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/yanjunhui/ChatGPT_Tunnel_SSH/internal/config"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/config"
 )
 
 // Manager owns named sessions shared by all callers of this MCP process.
@@ -22,6 +22,7 @@ type Manager struct {
 	pending  map[sessionKey]bool
 	ctx      context.Context
 	cancel   context.CancelFunc
+	desktop  chan struct{}
 }
 
 type sessionKey struct{ profile, name string }
@@ -31,20 +32,21 @@ type sessionKey struct{ profile, name string }
 // 中文：New 接收已校验配置，不立即连接；使用期间不要修改配置，结束时调用 Close。
 func New(c *config.Config) *Manager {
 	ctx, cancel := context.WithCancel(context.Background())
-	return &Manager{config: c, sessions: make(map[sessionKey]*Session), pending: make(map[sessionKey]bool), ctx: ctx, cancel: cancel}
+	return &Manager{config: c, sessions: make(map[sessionKey]*Session), pending: make(map[sessionKey]bool), ctx: ctx, cancel: cancel, desktop: make(chan struct{}, 1)}
 }
 
 // ConnectionInfo exposes non-secret settings and the number of retained sessions.
 // 中文：ConnectionInfo 返回不含凭据的配置及保留会话数，其中可包含已退出会话。
 type ConnectionInfo struct {
-	Name     string `json:"name"`
-	Host     string `json:"host"`
-	Port     int    `json:"port"`
-	User     string `json:"user"`
-	Workdir  string `json:"workdir"`
-	Default  bool   `json:"default"`
-	Sessions int    `json:"sessions"`
-	Status   string `json:"status"`
+	Name       string `json:"name"`
+	Host       string `json:"host"`
+	Port       int    `json:"port"`
+	User       string `json:"user"`
+	Workdir    string `json:"workdir"`
+	Default    bool   `json:"default"`
+	Sessions   int    `json:"sessions"`
+	Status     string `json:"status"`
+	VNCEnabled bool   `json:"vnc_enabled"`
 }
 
 // Connections reports configuration, not an unperformed connectivity check.
@@ -56,6 +58,7 @@ func (m *Manager) Connections() []ConnectionInfo {
 	result := make([]ConnectionInfo, 0, len(m.config.Profiles))
 	for name, p := range m.config.Profiles {
 		info := ConnectionInfo{Name: name, Host: p.Host, Port: p.Port, User: p.User, Workdir: p.Workdir, Default: name == m.config.DefaultProfile, Status: "configured; connect on use"}
+		info.VNCEnabled = p.VNC != nil && p.VNC.Enabled
 		for key := range m.sessions {
 			if key.profile == name {
 				info.Sessions++

@@ -12,8 +12,8 @@ import (
 	"testing"
 
 	"github.com/BurntSushi/toml"
-	"github.com/yanjunhui/ChatGPT_Tunnel_SSH/internal/config"
-	"github.com/yanjunhui/ChatGPT_Tunnel_SSH/internal/service"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/config"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/service"
 )
 
 type rig struct {

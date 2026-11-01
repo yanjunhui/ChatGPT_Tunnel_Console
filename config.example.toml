@@ -33,3 +33,14 @@ connect_timeout = "15s"
 # 0s disables the command deadline; background sessions do not use this timeout.
 # 0s 禁用命令期限；后台会话不使用此超时。
 command_timeout = "60s"
+
+# Optional desktop, reached from the SSH target. Disabled unless explicitly enabled.
+# 可选桌面从 SSH 目标访问，只有显式启用后才生效。
+# [profiles.server.vnc]
+# enabled = true
+# host = "127.0.0.1"
+# port = 5900
+# timeout = "15s"
+# Password reference is only needed for VncAuth; omit for the bundled loopback desktop.
+# 只有 VncAuth 需要密码引用，自带回环桌面应省略。
+# password = "file:/input/vnc-password"

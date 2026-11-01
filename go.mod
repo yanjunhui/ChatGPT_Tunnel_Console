@@ -1,5 +1,5 @@
 // Created by Yanjunhui
-module github.com/yanjunhui/ChatGPT_Tunnel_SSH
+module github.com/yanjunhui/ChatGPT_Tunnel_Console
 
 go 1.26.10
 

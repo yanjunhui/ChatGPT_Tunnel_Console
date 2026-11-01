@@ -3,7 +3,7 @@
 
 English | [简体中文](configuration.zh-CN.md) | [README](../README.md)
 
-This reference describes the repository's 0.1.2 implementation. See `internal/config`, `internal/setup`, `internal/tunnel` and `cmd/tunnel-ssh-mcp` for the corresponding code. Examples use placeholders, never real credentials.
+This reference describes the repository's 0.2.0 implementation. See `internal/config`, `internal/setup`, `internal/tunnel` and `cmd/tunnel-console-mcp` for the corresponding code. Examples use placeholders, never real credentials.
 
 ## TOML configuration
 
@@ -36,6 +36,20 @@ This reference describes the repository's 0.1.2 implementation. See `internal/co
 | `command_timeout` | `60s` | Nonnegative Go duration for independent commands; `0s` disables that deadline; persistent sessions do not use it |
 
 At least one of `private_key`, `password` or `agent_socket` must be configured. Multiple authentication methods may be supplied. The implementation does not check target host keys. Tunnel caller authentication does not establish the identity of an external SSH host.
+
+### Optional VNC configuration
+
+`[profiles.NAME.vnc]` enables desktop access only for that SSH target. Omitting it keeps VNC disabled and existing configurations valid.
+
+| VNC field | Default / requirement | Meaning |
+|---|---|---|
+| `enabled` | false | Explicitly allow desktop tools |
+| `host` | `127.0.0.1` | Hostname or IP reached from the SSH target, without a port |
+| `port` | 5900; `0` selects 5900 | Range 1–65535; bundled desktop uses 5901 |
+| `password` | Empty | Empty selects None; otherwise only `env:NAME` or `file:PATH` |
+| `timeout` | `15s` | Positive and at most `120s`, covering queueing, connection and operation |
+
+`check` validates fields/reference syntax without reading a password or probing VNC. Initialization persists password references; connection validates the classic VNC password limit of eight printable ASCII bytes. See the [VNC guide](vnc.md) for setup, authentication scope and operation bounds.
 
 ### Credential references
 
@@ -90,6 +104,7 @@ Native generations live under `/usr/local/lib/tunnel-ssh-mcp/releases/`; contain
 | `TUNNEL_SSH_WORKSPACE_DIR` | `./workspace` | `/workspace` in both runtime and development containers |
 | `TUNNEL_SSH_MCP_IMAGE` | `go-tunnel-ssh-mcp:latest` | Image tag shared by initialization and MCP runtime |
 | `TUNNEL_SSH_DEV_IMAGE` | `go-tunnel-ssh-dev:latest` | Development image tag |
+| `TUNNEL_CONSOLE_DESKTOP_IMAGE` | `go-tunnel-console-desktop:latest` | Optional desktop overlay image, replacing the development image |
 
 Use the same configuration mount for initialization and runtime. Keep `data/` permissions and symlinks when backing up. `developer_home` and `ssh_identity` are persistent named volumes; `docker compose down -v` removes them.
 
@@ -98,7 +113,7 @@ Use the same configuration mount for initialization and runtime. Keep `data/` pe
 For the standard Docker configuration, check the running supervisor without creating another tunnel instance:
 
 ```sh
-docker compose exec -T mcp tunnel-ssh-mcp version
+docker compose exec -T mcp tunnel-console-mcp version
 docker compose exec -T mcp tunnel-client health --port 8080 --require-control-plane-poll --json
 ```
 

@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yanjunhui/ChatGPT_Tunnel_SSH/internal/testssh"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/testssh"
 )
 
 func newTestManager(t *testing.T) (*Manager, *testssh.Server) {

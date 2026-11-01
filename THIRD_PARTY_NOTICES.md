@@ -27,6 +27,7 @@ Transitive Go dependencies are listed in `go.mod` and can be enumerated with `go
 
 - [OpenAI tunnel-client v0.0.19](https://github.com/openai/tunnel-client/blob/v0.0.19/LICENSE) uses Apache-2.0 and is downloaded from its official release. Its bundle includes other components such as [Cloudflare cloudflared](https://github.com/cloudflare/cloudflared/blob/master/LICENSE), which retain their own terms.
 - The Dockerfile uses official Go, Node.js and Debian images and installs Debian packages. Their license and source-availability requirements remain applicable, including to copies made into the development image.
+- The optional desktop image installs TigerVNC, Openbox, xterm, X11 utilities and fonts under their respective package licenses; this project's MIT license does not relicense them. Exact copyright/license inventories are in `/usr/share/doc/<package>/copyright` inside the built image; review applicable source and notice obligations before redistribution. The Go RFB client is independently implemented here and does not vendor a third-party VNC client library.
 - govulncheck and Gitleaks are development checks downloaded separately; their versions are pinned in the Makefile. They are not part of the MCP runtime.
 
 Before redistributing a built image or executable, retain all required upstream copyright, license and NOTICE files and satisfy any applicable source-distribution obligations. This document is an inventory for this source release, not a replacement for upstream license texts or a complete binary-distribution notice bundle.

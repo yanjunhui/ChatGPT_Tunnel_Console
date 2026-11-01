@@ -12,9 +12,9 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/yanjunhui/ChatGPT_Tunnel_SSH/internal/config"
-	"github.com/yanjunhui/ChatGPT_Tunnel_SSH/internal/service"
-	"github.com/yanjunhui/ChatGPT_Tunnel_SSH/internal/tunnel"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/config"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/service"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/tunnel"
 )
 
 // Installer stages a native release before switching the active service.

@@ -3,6 +3,14 @@
 
 English | [简体中文](CHANGELOG.zh-CN.md)
 
+## 0.2.0 — 2026-11-01
+
+- Rename the project/repository to ChatGPT_Tunnel_Console, the Go module to `github.com/yanjunhui/ChatGPT_Tunnel_Console`, and the primary CLI to `tunnel-console-mcp`.
+- Add opt-in VNC screenshots, pointer gestures, keyboard chords and Unicode typing as four MCP tools over SSH forwarding; existing SSH/SFTP contracts remain available.
+- Implement bounded RFB 3.3/3.7/3.8 Raw screenshots, desktop resize, None/VncAuth authentication and cancellation cleanup without adding a Go dependency.
+- Add an optional TigerVNC/Openbox Docker desktop, an initializer desktop choice, real desktop acceptance and complete bilingual configuration/tool documentation.
+- Retain existing deployment paths, Compose/volume identities, environment settings and the old CLI alias. Existing configurations keep VNC disabled. Running 0.1.1 services are not upgraded by this source release.
+
 ## 0.1.2 — 2026-11-01
 
 - Fix `--help` returning an error for run, serve, check, doctor and install-tunnel; add a regression test covering these commands and init.

@@ -1,11 +1,11 @@
 <!-- Created by Yanjunhui -->
-# OpenAI Tunnel SSH MCP · Go
+# ChatGPT Tunnel Console · Go
 
 English | [简体中文](README.zh-CN.md)
 
-An independent Go SSH MCP server exposed through the official OpenAI tunnel. The tunnel authenticates MCP callers. The server adds no second Bearer token, OAuth layer, roles, approval system, command classification, allow/deny lists, path sandbox or daily quota.
+An independent Go console for SSH, SFTP and VNC desktops, exposed as an MCP server through the official OpenAI tunnel. The tunnel authenticates MCP callers. The server adds no second Bearer token, OAuth layer, roles, approval system, command classification, allow/deny lists, path sandbox or daily quota.
 
-The feature scope draws on `ssh-mcp-main 2` and the deployment approach on `SSH-MCP-main`. This project neither copies nor wraps their TypeScript/Python implementations and does not depend on npm ssh-mcp. MCP, SSH, sessions, SFTP, configuration and startup are implemented in Go; the tunnel uses the official tunnel-client.
+The feature scope draws on `ssh-mcp-main 2` and the deployment approach on `SSH-MCP-main`. This project neither copies nor wraps their TypeScript/Python implementations and does not depend on npm ssh-mcp. MCP, SSH, sessions, SFTP, VNC, configuration and startup are implemented in Go; the tunnel uses the official tunnel-client.
 
 ```text
 ChatGPT / Codex
@@ -14,20 +14,21 @@ ChatGPT / Codex
 OpenAI Tunnel <-- outbound connection <-- official tunnel-client
                                                  | stdio
                                                  v
-                                            Go SSH MCP
-                                                 | SSH / SFTP
+                                            Go Console MCP
+                                                 | SSH / SFTP / forwarded VNC
                                                  v
                                   Docker development environment / SSH host
 ```
 
 There is no MCP HTTP listener. `serve` is a local stdio worker launched by tunnel-client and also used by tests; it does not authenticate callers itself. Do not separately expose it through HTTP, TCP or socat. The official tunnel diagnostics bind only to loopback.
 
-Current source version: **0.1.2**. This independent project is licensed under [MIT](LICENSE). See the [security policy](SECURITY.md) before deployment: authorized callers have the SSH account’s full permissions, and SSH target host keys are not verified.
+Current source version: **0.2.0**. This independent project is licensed under [MIT](LICENSE). See the [security policy](SECURITY.md) before deployment: authorized callers have the SSH account’s full permissions, and SSH target host keys are not verified.
 
 ## Documentation
 
 - [Configuration and CLI reference](docs/configuration.md): defaults, credential references, initialization and validation boundaries.
-- [MCP tool reference](docs/tool-reference.md): parameters, results and errors for all 13 tools.
+- [VNC desktop guide](docs/vnc.md): setup, screenshots, mouse/keyboard operations and limits.
+- [MCP tool reference](docs/tool-reference.md): parameters, results and errors for all 17 tools.
 - [Verification record](docs/verification.md) and [live deployment record](docs/live-deployment.md): historical tests and actual tunnel acceptance evidence.
 
 - [Contributing](CONTRIBUTING.md), [security policy](SECURITY.md), [changelog](CHANGELOG.md) and [third-party notices](THIRD_PARTY_NOTICES.md).
@@ -49,10 +50,28 @@ Current source version: **0.1.2**. This independent project is licensed under [M
 | `sftp-upload` | Write UTF-8 or base64 content, overwriting the remote file |
 | `sftp-download-file` | Stream to the MCP server filesystem, replacing the local destination on success |
 | `sftp-upload-file` | Stream from the MCP server filesystem, overwriting the remote destination |
+| `vnc-screenshot` | Return a native PNG as MCP image content plus desktop metadata |
+| `vnc-pointer` | Move, click, drag or scroll using screenshot pixel coordinates |
+| `vnc-key` | Press and release one key or keyboard chord |
+| `vnc-type` | Type Unicode text using key events, without clipboard access |
 
 Since 0.1.1, `sftp-download` publishes an `outputSchema` and returns both MCP `structuredContent` and the existing `content[0].text` JSON. Both contain `content` (text or base64), `encoding`, and `bytes` (original file bytes). Empty files explicitly return an empty string and `0`. Callers may use structured fields or continue decoding the text JSON. Path, encoding, UTF-8 and inline-size failures return `isError: true` with error text and no successful file payload.
 
 The old `read-command`, `privileged-command` and `reload-config` interfaces are not retained. All independent commands use `run-command`; sudo follows the target account's actual permissions. Restart to load configuration changes. Arbitrary shell tools are not labeled read-only.
+
+## Optional VNC desktop
+
+Choose **3: bundled graphical desktop** in the Docker initializer, then use:
+
+```sh
+docker compose -f compose.yaml -f compose.desktop.yaml up -d --build
+```
+
+This adds a 1280×800 TigerVNC/Openbox desktop with an xterm terminal. VNC listens on the development container’s loopback port 5901 and is reached through SSH; no VNC host port is published. Call `vnc-screenshot`, send input, then capture again to confirm the result. External desktops can be enabled per SSH profile. See the [complete VNC guide](docs/vnc.md).
+
+### Name and upgrade compatibility
+
+The repository, Go module, MCP implementation and primary CLI are now `ChatGPT_Tunnel_Console`, `github.com/yanjunhui/ChatGPT_Tunnel_Console`, `chatgpt-tunnel-console` and `tunnel-console-mcp`. The old CLI alias remains available in local builds and runtime images. Existing native installation/service paths, Compose project name `go-tunnel-ssh`, volume identities and `TUNNEL_SSH_*` settings remain stable so upgrades reuse data. Existing checkout directories need not be renamed, especially when live bind mounts reference them. New checkouts use the new directory name. VNC is disabled in existing configurations; this source release does not upgrade running services automatically.
 
 ## Docker Linux development environment
 
@@ -61,8 +80,8 @@ Requires Docker Engine / Docker Desktop with Compose v2. The first build needs n
 Get the source before running commands below:
 
 ```sh
-git clone https://github.com/yanjunhui/ChatGPT_Tunnel_SSH.git
-cd ChatGPT_Tunnel_SSH
+git clone https://github.com/yanjunhui/ChatGPT_Tunnel_Console.git
+cd ChatGPT_Tunnel_Console
 ```
 
 
@@ -158,7 +177,7 @@ Supports macOS/Linux on amd64/arm64. The module requires Go 1.26.10 or newer; ol
 
 ```sh
 make build
-./bin/tunnel-ssh-mcp init
+./bin/tunnel-console-mcp init
 ```
 
 `init` prompts for the OpenAI tunnel ID, runtime key, SSH host, port, user, working directory, and private key or password. Secrets are not echoed; Ctrl+C restores terminal state. The installer announces system paths before writing and uses `sudo` when the invoking account lacks installation privileges.
@@ -184,8 +203,8 @@ The default runtime user is the original `sudo` caller; direct root invocation u
 Import existing configuration, including multiple profiles:
 
 ```sh
-./bin/tunnel-ssh-mcp init --config ./config.toml
-sudo ./bin/tunnel-ssh-mcp init --non-interactive --config /absolute/path/config.toml
+./bin/tunnel-console-mcp init --config ./config.toml
+sudo ./bin/tunnel-console-mcp init --non-interactive --config /absolute/path/config.toml
 ```
 
 The initializer resolves `env:` credentials and persists file references for service restarts. Because sudo may remove environment variables, prefer `file:` references for non-interactive imports. Keys are never inserted into sudo arguments. Boot services cannot depend on a login session's `SSH_AUTH_SOCK`; use private-key files or passwords. Manual `run` mode still supports an SSH agent.
@@ -230,9 +249,9 @@ cp config.example.toml config.toml
 Edit SSH `host`, `user`, `private_key`, `workdir` and tunnel settings. Relative paths resolve against the configuration file's directory; TOML paths do not expand `~`. Passwords and passphrases must use `env:NAME` or `file:/absolute/path` references, not inline plaintext. OpenSSH private keys are supported. Set `agent_socket = "env:SSH_AUTH_SOCK"` to use an agent.
 
 ```sh
-./bin/tunnel-ssh-mcp check --config config.toml
-./bin/tunnel-ssh-mcp doctor --config config.toml
-./bin/tunnel-ssh-mcp run --config config.toml
+./bin/tunnel-console-mcp check --config config.toml
+./bin/tunnel-console-mcp doctor --config config.toml
+./bin/tunnel-console-mcp run --config config.toml
 ```
 
 `check` validates configuration structure, not credentials or remote connectivity. `doctor` runs official diagnostics and contacts the tunnel service. `run` replaces itself with tunnel-client, which supervises the Go stdio worker. A restart loses in-memory sessions.

@@ -2,5 +2,5 @@
 blank_issues_enabled: true
 contact_links:
   - name: Security vulnerability / 安全漏洞
-    url: https://github.com/yanjunhui/ChatGPT_Tunnel_SSH/security/advisories/new
+    url: https://github.com/yanjunhui/ChatGPT_Tunnel_Console/security/advisories/new
     about: Report sensitive vulnerabilities privately. 请私下报告包含敏感细节的漏洞。

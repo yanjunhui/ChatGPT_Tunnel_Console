@@ -3,14 +3,14 @@
 
 English | [简体中文](tool-reference.zh-CN.md) | [README](../README.md)
 
-Applies to 0.1.2. Tool registration is in `internal/server/server.go`; input/result types and operations are in `internal/remote`. JSON names below are the actual public contract. Configuration defaults are documented in [configuration.md](configuration.md).
+Applies to 0.2.0. Tool registration is in `internal/server/server.go`; input/result types and operations are in `internal/remote`. JSON names below are the actual public contract. Configuration defaults are documented in [configuration.md](configuration.md).
 
 ## Shared conventions
 
 - Unless stated otherwise, `profile` is an optional string selecting an SSH profile; omitted/empty selects `default_profile`. An unknown name is an error. `list-sessions` selects one profile, not all profiles.
 - Required fields must be supplied even when an empty string is meaningful, such as upload content or input sent only to close stdin. Remote `path` must be nonempty. Session names must be nonblank and are unique within a profile, including retained exited sessions.
 - `path` belongs to the SSH host. Relative remote paths use its configured `workdir`. `local_path` belongs to the MCP server, not the ChatGPT client, and relative local paths use the MCP process working directory. Use absolute paths for predictable streaming behavior. No transfer-root restriction is applied.
-- All tools return JSON in MCP `content[0].text` on success. Only `sftp-download` additionally declares an `outputSchema` and supplies `structuredContent` in this version. Decode the text for other tools; do not assume every tool has structured output.
+- Except for screenshots, tools return JSON in MCP `content[0].text` on success. `sftp-download` additionally declares an `outputSchema` and supplies `structuredContent`; `vnc-screenshot` returns an image and structured metadata (below). Decode text for other tools.
 - Validation, connection and operation failures return MCP tool errors (`isError: true`). Independent command execution failures retain stdout/stderr and status fields in their JSON result and set `isError: true` when `error` is nonempty. Nonzero exit status is a failure, even if output was produced.
 - Read-only annotations describe intended behavior for clients; they are not enforcement or authorization. Arbitrary commands, uploads and server-side file downloads are not read-only.
 
@@ -18,7 +18,7 @@ Applies to 0.1.2. Tool registration is in `internal/server/server.go`; input/res
 
 ### `list-connections`
 
-Input: `{}`. Returns an array sorted by name. Each entry contains `name`, `host`, `port`, `user`, `workdir`, `default`, `sessions`, and `status`. Session counts include retained exited sessions. Status is `configured; connect on use`: this call neither authenticates to SSH nor probes connectivity, and does not expose credentials.
+Input: `{}`. Returns an array sorted by name. Each entry contains `name`, `host`, `port`, `user`, `workdir`, `default`, `sessions`, `status`, and `vnc_enabled`. Session counts include retained exited sessions. Status is `configured; connect on use`: this call neither authenticates to SSH nor probes connectivity, and does not expose credentials.
 
 ### `run-command`
 
@@ -132,3 +132,16 @@ Input: required remote `path` and MCP-server `local_path`, optional `profile`. S
 ### `sftp-upload-file`
 
 Input: required remote destination `path` and MCP-server source `local_path`, optional `profile`. The local source must be a regular file. Streams without an inline-size limit and overwrites the remote target. Returns `bytes` and the remote destination `path`. The remote write is not atomic and may be partial on failure, just like inline upload.
+
+## VNC desktop tools
+
+All four tools accept optional `profile`, require `vnc.enabled = true`, and use a separate shared VNC connection through SSH forwarding. Failures return `isError: true`; input may be partially delivered and is never retried automatically. The default 15-second timeout includes queueing and connection; cancellation and manager shutdown release connections. See the [VNC guide](vnc.md) for workflows and key names.
+
+| Tool | Required arguments | Successful result |
+|---|---|---|
+| `vnc-screenshot` | None | `content[0]` is an `image/png` image; `content[1].text` and `structuredContent` contain `width`, `height`, `name`; declares `outputSchema` |
+| `vnc-pointer` | `events`: 1–256 objects with integer `x`, `y`, `buttons` | Text JSON: `desktop` (width/height/name) and `message` |
+| `vnc-key` | `keys`: 1–16 strings representing a key or chord | Same as above |
+| `vnc-type` | `text`: 1–4096 Unicode characters | Same as above |
+
+Screenshots return native PNG only after full-frame coverage: at most 8192 per side, 8,388,608 total pixels and 16 MiB encoded PNG. Pointer coordinates start at the top left; the entire batch is validated against the current desktop before sending. Button bits are left 1/middle 2/right 4/up-scroll 8/down-scroll 16, zero releases, and a final release is automatic. Chords press in order and release in reverse. Text uses key events, treats CRLF as one Return and supports CR/LF and Tab; invalid UTF-8 and other controls fail. Clipboard is not used. Input results acknowledge writes only; capture again to confirm application state. Only screenshots are annotated read-only; input tools are not.

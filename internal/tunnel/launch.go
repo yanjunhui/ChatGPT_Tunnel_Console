@@ -12,7 +12,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/yanjunhui/ChatGPT_Tunnel_SSH/internal/config"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/config"
 )
 
 // Arguments builds an official tunnel-client invocation without exposing keys.

@@ -3,6 +3,14 @@
 
 [English](CHANGELOG.md) | 简体中文
 
+## 0.2.0 — 2026-11-01
+
+- 项目／仓库更名为 ChatGPT_Tunnel_Console，Go 模块改为 `github.com/yanjunhui/ChatGPT_Tunnel_Console`，主命令改为 `tunnel-console-mcp`。
+- 新增按配置启用的 VNC 截图、鼠标手势、组合键和 Unicode 输入四项 MCP 工具，经 SSH 转发访问；现有 SSH/SFTP 契约继续可用。
+- 无新增 Go 依赖，实现有界 RFB 3.3/3.7/3.8 Raw 截图、桌面尺寸变化、None/VncAuth 鉴权及取消清理。
+- 增加可选 TigerVNC/Openbox Docker 桌面、初始化桌面选项、真实桌面验收及完整双语配置／工具文档。
+- 保留原部署路径、Compose／卷标识、环境配置和旧命令别名；已有配置关闭 VNC，本次源码发布不升级正在运行的 0.1.1 服务。
+
 ## 0.1.2 — 2026-11-01
 
 - 修复 run、serve、check、doctor、install-tunnel 的 `--help` 错误退出；增加覆盖这些命令及 init 的回归测试。

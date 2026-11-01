@@ -3,7 +3,7 @@
 
 [English](configuration.md) | 简体中文 | [README](../README.zh-CN.md)
 
-本文描述仓库 0.1.2 的实际实现，对应代码为 `internal/config`、`internal/setup`、`internal/tunnel` 和 `cmd/tunnel-ssh-mcp`。示例只使用占位值，不包含真实凭据。
+本文描述仓库 0.2.0 的实际实现，对应代码为 `internal/config`、`internal/setup`、`internal/tunnel` 和 `cmd/tunnel-console-mcp`。示例只使用占位值，不包含真实凭据。
 
 ## TOML 配置
 
@@ -36,6 +36,20 @@
 | `command_timeout` | `60s` | 独立命令的非负 Go duration；`0s` 禁用期限；持久会话不使用此值 |
 
 `private_key`、`password`、`agent_socket` 至少提供一项，可同时配置多种认证方式。当前实现不校验目标主机公钥；隧道的调用方认证不能证明外部 SSH 主机身份。
+
+### 可选 VNC 配置
+
+`[profiles.NAME.vnc]` 仅对该 SSH 目标启用桌面；省略时完全关闭，已有配置继续有效。
+
+| VNC 字段 | 默认值／要求 | 含义 |
+|---|---|---|
+| `enabled` | false | 显式允许桌面工具 |
+| `host` | `127.0.0.1` | 从 SSH 目标访问的主机名或 IP，不含端口 |
+| `port` | 5900；`0` 采用 5900 | 范围 1–65535；自带桌面使用 5901 |
+| `password` | 空 | 空值选择 None；否则只允许 `env:NAME` 或 `file:PATH` |
+| `timeout` | `15s` | 正值且不超过 `120s`，覆盖排队、连接与操作 |
+
+`check` 验证字段和引用格式，不读取密码或探测 VNC。初始化持久化密码引用，连接时再验证传统 VNC 密码不超过八个可打印 ASCII 字节。完整设置、认证范围和操作边界见 [VNC 指南](vnc.zh-CN.md)。
 
 ### 凭据引用
 
@@ -90,6 +104,7 @@ Docker 初始化以 root 运行，为非 root 正式账户设置归属。原生�
 | `TUNNEL_SSH_WORKSPACE_DIR` | `./workspace` | MCP 及开发容器内的 `/workspace` |
 | `TUNNEL_SSH_MCP_IMAGE` | `go-tunnel-ssh-mcp:latest` | 初始化和 MCP 运行共用的镜像标签 |
 | `TUNNEL_SSH_DEV_IMAGE` | `go-tunnel-ssh-dev:latest` | 开发镜像标签 |
+| `TUNNEL_CONSOLE_DESKTOP_IMAGE` | `go-tunnel-console-desktop:latest` | 可选桌面叠加镜像，替代开发镜像 |
 
 初始化与运行须使用相同配置挂载。备份 `data/` 时保留权限和符号链接。`developer_home` 与 `ssh_identity` 是持久化具名卷，`docker compose down -v` 会删除它们。
 
@@ -98,7 +113,7 @@ Docker 初始化以 root 运行，为非 root 正式账户设置归属。原生�
 标准 Docker 配置下检查现存监督进程，不另起同一隧道实例：
 
 ```sh
-docker compose exec -T mcp tunnel-ssh-mcp version
+docker compose exec -T mcp tunnel-console-mcp version
 docker compose exec -T mcp tunnel-client health --port 8080 --require-control-plane-poll --json
 ```
 

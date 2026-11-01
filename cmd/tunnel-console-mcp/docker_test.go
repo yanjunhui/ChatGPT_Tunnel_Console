@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/yanjunhui/ChatGPT_Tunnel_SSH/internal/remote"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/remote"
 )
 
 func TestDockerOpenSSH(t *testing.T) {

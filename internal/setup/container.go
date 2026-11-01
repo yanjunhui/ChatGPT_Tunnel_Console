@@ -8,8 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/yanjunhui/ChatGPT_Tunnel_SSH/internal/config"
-	"github.com/yanjunhui/ChatGPT_Tunnel_SSH/internal/tunnel"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/config"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/tunnel"
 )
 
 // ContainerInstaller writes configuration for a fixed mount shared with runtime.
@@ -62,7 +62,7 @@ func (i ContainerInstaller) Init(ctx context.Context, source string, nonInteract
 	}
 	published = true
 	fmt.Fprintf(c.Output, "容器初始化完成，配置已保存：%s\n", filepath.Join(i.Directory, "current", "config.toml"))
-	fmt.Fprintln(c.Output, "请在宿主机执行 docker compose up -d --build；已有容器需重启以加载新配置。初始化未启动隧道或验证远端连通性。")
+	containerStartHint(c, d.config)
 	return nil
 }
 
@@ -137,7 +137,7 @@ func (i ContainerInstaller) prepare(ctx context.Context, d draft) (string, error
 	if err = writeConfig(cfg, files, dir); err != nil {
 		return "", err
 	}
-	if _, err = tunnel.Arguments(cfg, "/usr/local/bin/tunnel-ssh-mcp", filepath.Join(dir, "config.toml"), "run"); err != nil {
+	if _, err = tunnel.Arguments(cfg, "/usr/local/bin/tunnel-console-mcp", filepath.Join(dir, "config.toml"), "run"); err != nil {
 		return "", err
 	}
 	if err = i.ownership(dir); err != nil {

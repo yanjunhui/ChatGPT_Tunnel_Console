@@ -12,8 +12,8 @@ import (
 	"runtime"
 	"syscall"
 
-	"github.com/yanjunhui/ChatGPT_Tunnel_SSH/internal/service"
-	"github.com/yanjunhui/ChatGPT_Tunnel_SSH/internal/setup"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/service"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/setup"
 )
 
 type initOptions struct {

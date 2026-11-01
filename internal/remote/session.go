@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yanjunhui/ChatGPT_Tunnel_SSH/internal/config"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/config"
 	"golang.org/x/crypto/ssh"
 )
 

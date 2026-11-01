@@ -18,7 +18,7 @@ import (
 	"testing"
 
 	"github.com/pkg/sftp"
-	"github.com/yanjunhui/ChatGPT_Tunnel_SSH/internal/config"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/config"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -117,6 +117,11 @@ func (s *Server) connection(conn net.Conn, cfg *ssh.ServerConfig) {
 	var channelsWG sync.WaitGroup
 	defer channelsWG.Wait()
 	for next := range channels {
+		if next.ChannelType() == "direct-tcpip" {
+			channelsWG.Add(1)
+			go func() { defer channelsWG.Done(); forward(next) }()
+			continue
+		}
 		if next.ChannelType() != "session" {
 			_ = next.Reject(ssh.UnknownChannelType, "only session")
 			continue

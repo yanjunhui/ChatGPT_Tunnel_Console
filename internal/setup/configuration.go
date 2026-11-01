@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/BurntSushi/toml"
-	"github.com/yanjunhui/ChatGPT_Tunnel_SSH/internal/config"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/config"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -47,6 +47,10 @@ func prepareConfigWith(d draft, directory string, prepare profilePreparer) (*con
 		p, err = prepare(d, p, fmt.Sprintf("ssh-%x", sha256.Sum256([]byte(name))), directory, files)
 		if err != nil {
 			return nil, nil, fmt.Errorf("SSH 配置 %q: %w", name, err)
+		}
+		p, err = prepareDesktop(d, p, fmt.Sprintf("vnc-%x", sha256.Sum256([]byte(name))), directory, files)
+		if err != nil {
+			return nil, nil, fmt.Errorf("VNC 配置 %q: %w", name, err)
 		}
 		c.Profiles[name] = p
 	}

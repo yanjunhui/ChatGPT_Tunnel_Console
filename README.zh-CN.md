@@ -1,11 +1,11 @@
 <!-- Created by Yanjunhui -->
-# OpenAI Tunnel SSH MCP · Go
+# ChatGPT Tunnel Console · Go
 
 [English](README.md) | 简体中文
 
-用 Go 独立实现的 SSH MCP 服务。对外入口为 OpenAI 官方隧道，MCP 调用方鉴权完全由隧道负责；服务端不提供第二套 Bearer Token、OAuth、角色、审批、命令分类、命令黑白名单、路径沙箱或每日配额。
+用 Go 独立实现的 SSH、SFTP 和 VNC 桌面控制台，以 MCP 工具提供能力。对外入口为 OpenAI 官方隧道，MCP 调用方鉴权完全由隧道负责；服务端不提供第二套 Bearer Token、OAuth、角色、审批、命令分类、命令黑白名单、路径沙箱或每日配额。
 
-参考了 `ssh-mcp-main 2` 的功能范围和 `SSH-MCP-main` 的部署方式。没有复制或包装其 TypeScript/Python 实现，也不依赖 npm 的 ssh-mcp。MCP、SSH、会话、SFTP、配置和启动逻辑均由本项目 Go 代码实现；隧道链路使用官方 tunnel-client。
+参考了 `ssh-mcp-main 2` 的功能范围和 `SSH-MCP-main` 的部署方式。没有复制或包装其 TypeScript/Python 实现，也不依赖 npm 的 ssh-mcp。MCP、SSH、会话、SFTP、VNC、配置和启动逻辑均由本项目 Go 代码实现；隧道链路使用官方 tunnel-client。
 
 ```text
 ChatGPT / Codex
@@ -14,20 +14,21 @@ ChatGPT / Codex
 OpenAI Tunnel ← 出站连接 ← 官方 tunnel-client
                                   │ stdio
                                   ▼
-                             Go SSH MCP
-                                  │ SSH / SFTP
+                             Go Console MCP
+                                  │ SSH / SFTP / 转发 VNC
                                   ▼
                       Docker 开发环境 / 现有 SSH 主机
 ```
 
 没有 MCP HTTP 监听端口。`serve` 是由 tunnel-client 启动的本地 stdio 工作进程，也可用于本地测试；它本身不验证调用者身份。部署中不要另行将其通过 HTTP、TCP 或 socat 暴露。官方隧道的诊断界面仅绑定回环地址。
 
-当前源码版本：**0.1.2**。本独立项目采用 [MIT](LICENSE) 许可证。部署前请阅读[安全说明](SECURITY.zh-CN.md)：获授权的调用者拥有 SSH 账户的完整权限，当前不校验 SSH 目标主机公钥。
+当前源码版本：**0.2.0**。本独立项目采用 [MIT](LICENSE) 许可证。部署前请阅读[安全说明](SECURITY.zh-CN.md)：获授权的调用者拥有 SSH 账户的完整权限，当前不校验 SSH 目标主机公钥。
 
 ## 文档导航
 
 - [配置与命令行参考](docs/configuration.zh-CN.md)：默认值、凭据引用、初始化和校验范围。
-- [MCP 工具参考](docs/tool-reference.zh-CN.md)：13 个工具的参数、结果和错误语义。
+- [VNC 桌面指南](docs/vnc.zh-CN.md)：配置、截图、键鼠操作和边界。
+- [MCP 工具参考](docs/tool-reference.zh-CN.md)：17 个工具的参数、结果和错误语义。
 - [验证记录](docs/verification.zh-CN.md)及[正式部署记录](docs/live-deployment.zh-CN.md)：历史测试与真实隧道验收证据。
 
 - [贡献指南](CONTRIBUTING.zh-CN.md)、[安全说明](SECURITY.zh-CN.md)、[更新记录](CHANGELOG.zh-CN.md)及[第三方声明](THIRD_PARTY_NOTICES.zh-CN.md)。
@@ -49,10 +50,28 @@ OpenAI Tunnel ← 出站连接 ← 官方 tunnel-client
 | `sftp-upload` | 写入 UTF-8 或 base64 内容，覆盖已有远端文件 |
 | `sftp-download-file` | 流式下载到 MCP 进程所在文件系统，成功后替换本地目标文件 |
 | `sftp-upload-file` | 从 MCP 进程所在文件系统流式上传，覆盖远端文件 |
+| `vnc-screenshot` | 返回原尺寸 PNG 的 MCP 图片内容及桌面元数据 |
+| `vnc-pointer` | 按截图像素坐标移动、点击、拖动或滚动 |
+| `vnc-key` | 按下并释放单键或组合键 |
+| `vnc-type` | 通过按键事件输入 Unicode 文本，不访问剪贴板 |
 
 从 0.1.1 起，`sftp-download` 发布 `outputSchema`，成功时同时返回 MCP `structuredContent` 和原有 `content[0].text` JSON。两者均包含 `content`（文件文本或 base64）、`encoding` 和 `bytes`（原始文件字节数）；空文件明确返回空字符串和 `0`。调用方可直接读取结构化字段，旧的文本 JSON 读取方式继续可用。路径、编码、UTF-8 或内联大小检查失败时返回 `isError: true` 和错误文本，不返回成功数据。
 
 不保留 `read-command`、`privileged-command`、`reload-config` 等旧接口：任意命令统一走 `run-command`，sudo 按目标操作系统的实际权限执行，修改配置后重启。没有声称是只读的任意 shell 工具。
+
+## 可选 VNC 桌面
+
+在 Docker 初始化向导选择 **3：自带图形桌面**，然后执行：
+
+```sh
+docker compose -f compose.yaml -f compose.desktop.yaml up -d --build
+```
+
+此选项增加 1280×800 的 TigerVNC/Openbox 桌面和 xterm 终端。VNC 仅监听开发容器回环端口 5901，经 SSH 访问，不发布宿主机 VNC 端口。先调用 `vnc-screenshot`，再发送输入并重新截图确认结果；外部桌面可按 SSH 配置启用，详见[完整 VNC 指南](docs/vnc.zh-CN.md)。
+
+### 更名与升级兼容
+
+仓库、Go 模块、MCP 实现及主命令现分别为 `ChatGPT_Tunnel_Console`、`github.com/yanjunhui/ChatGPT_Tunnel_Console`、`chatgpt-tunnel-console`、`tunnel-console-mcp`。本地构建和运行镜像保留旧命令别名。原生安装／服务路径、Compose 项目名 `go-tunnel-ssh`、持久卷标识和 `TUNNEL_SSH_*` 配置保持稳定，使升级继续使用原数据。已有检出目录无需更名，尤其是正在被正式容器绑定挂载的目录；新检出使用新目录名。已有配置默认关闭 VNC，本次源码发布不会自动升级运行服务。
 
 ## Docker Linux 开发环境
 
@@ -61,8 +80,8 @@ OpenAI Tunnel ← 出站连接 ← 官方 tunnel-client
 执行以下命令前，先获取源码：
 
 ```sh
-git clone https://github.com/yanjunhui/ChatGPT_Tunnel_SSH.git
-cd ChatGPT_Tunnel_SSH
+git clone https://github.com/yanjunhui/ChatGPT_Tunnel_Console.git
+cd ChatGPT_Tunnel_Console
 ```
 
 1. 在项目根目录运行一次性初始化容器：
@@ -157,7 +176,7 @@ docker compose down                          # 删除容器并保留具名卷
 
 ```sh
 make build
-./bin/tunnel-ssh-mcp init
+./bin/tunnel-console-mcp init
 ```
 
 `init` 会引导输入 OpenAI 隧道 ID、运行时 API Key、SSH 主机/端口/用户/工作目录，以及私钥或密码。密钥和密码输入不回显；Ctrl+C 取消时恢复终端状态。安装器先提示系统写入路径，普通账户执行时自动通过 `sudo` 获取注册服务所需权限。
@@ -183,8 +202,8 @@ make build
 也可导入已有配置，支持多个 SSH profile：
 
 ```sh
-./bin/tunnel-ssh-mcp init --config ./config.toml
-sudo ./bin/tunnel-ssh-mcp init --non-interactive --config /absolute/path/config.toml
+./bin/tunnel-console-mcp init --config ./config.toml
+sudo ./bin/tunnel-console-mcp init --non-interactive --config /absolute/path/config.toml
 ```
 
 导入配置中的 `env:` 凭据会解析并保存为文件引用，使服务在重启后仍能读取。`sudo` 可能清除调用终端的环境变量，因此非交互导入优先使用 `file:` 引用；不会把密钥加入 sudo 参数。开机服务不支持依赖登录会话的 `SSH_AUTH_SOCK`，应改用私钥文件或密码；直接 `run` 模式仍支持 SSH agent。
@@ -229,9 +248,9 @@ cp config.example.toml config.toml
 编辑 `config.toml` 中 SSH 的 host、user、private_key、workdir，以及隧道 ID/凭据引用。路径相对配置文件所在目录解析，不展开 `~`。密码和密钥口令支持 `env:变量名` 或 `file:/绝对路径`；不接受直接写入 TOML 的明文密码。私钥文件支持 OpenSSH 格式；也可通过 `agent_socket = "env:SSH_AUTH_SOCK"` 使用 SSH agent。
 
 ```sh
-./bin/tunnel-ssh-mcp check --config config.toml
-./bin/tunnel-ssh-mcp doctor --config config.toml
-./bin/tunnel-ssh-mcp run --config config.toml
+./bin/tunnel-console-mcp check --config config.toml
+./bin/tunnel-console-mcp doctor --config config.toml
+./bin/tunnel-console-mcp run --config config.toml
 ```
 
 `check` 仅验证配置结构，不验证凭据和远端连通性。`doctor` 运行官方诊断，会访问 OpenAI 隧道服务。`run` 将进程交给 tunnel-client，由官方进程监督 Go stdio 子进程；重启后内存中的会话会丢失。

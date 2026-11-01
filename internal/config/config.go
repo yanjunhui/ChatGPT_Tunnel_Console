@@ -47,6 +47,7 @@ type Profile struct {
 	Workdir        string `toml:"workdir"`
 	ConnectTimeout string `toml:"connect_timeout"`
 	CommandTimeout string `toml:"command_timeout"`
+	VNC            *VNC   `toml:"vnc,omitempty"`
 }
 
 // Load reads a TOML file. Relative file paths resolve against that file.
@@ -146,6 +147,9 @@ func (p *Profile) normalize(base string) error {
 	p.Passphrase = resolveFile(base, p.Passphrase)
 	if p.PrivateKey == "" && p.Password == "" && p.AgentSocket == "" {
 		return fmt.Errorf("private_key, password, or agent_socket is required")
+	}
+	if p.VNC != nil {
+		return p.VNC.normalize(base)
 	}
 	return nil
 }

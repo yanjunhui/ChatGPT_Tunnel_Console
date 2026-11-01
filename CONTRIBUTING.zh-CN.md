@@ -6,17 +6,18 @@
 使用 `go.mod` 指定版本的 Go、用于文档检查的 Python 3，以及用于容器验收的 Docker Compose v2。开发支持 macOS/Linux，远端运行目标为 POSIX SSH 主机。
 
 ```sh
-git clone https://github.com/yanjunhui/ChatGPT_Tunnel_SSH.git
-cd ChatGPT_Tunnel_SSH
+git clone https://github.com/yanjunhui/ChatGPT_Tunnel_Console.git
+cd ChatGPT_Tunnel_Console
 make check test vet build linux
 ```
 
-`make` 将 Go、模块、构建和临时文件保存到 `.cache/`，生成二进制位于 `bin/`，均不得提交。`make test` 执行带竞态检测的真实本地 SSH/SFTP 和 PTY 测试，不连接正式隧道。两个 Docker 测试需要显式启用：
+`make` 将 Go、模块、构建和临时文件保存到 `.cache/`，生成二进制位于 `bin/`，均不得提交。`make test` 执行带竞态检测的真实本地 SSH/SFTP 和 PTY 测试，不连接正式隧道。Docker 验收测试需要显式启用：
 
 ```sh
 TUNNEL_SSH_MCP_IMAGE=go-tunnel-ssh-mcp:review \
 TUNNEL_SSH_DEV_IMAGE=go-tunnel-ssh-dev:review \
-make docker-build docker-test
+TUNNEL_CONSOLE_DESKTOP_IMAGE=go-tunnel-console-desktop:review \
+make docker-build docker-test desktop-build desktop-test
 ```
 
 存在正式部署时使用独立镜像标签。测试创建临时容器和卷，使用 stdio 与虚拟凭据，并清理自身资源。不要对需要保留数据的部署运行 `down -v`。
@@ -39,3 +40,5 @@ Docker 测试使用私有临时工作目录；短暂运行的 root 容器为夹�
 ## 许可证
 
 贡献按仓库 [MIT 许可证](LICENSE) 接收，只提交你有权贡献的代码和文档。第三方组件保留各自许可证，见[第三方声明](THIRD_PARTY_NOTICES.zh-CN.md)。
+
+桌面验收验证 MCP 图片输出、真实鼠标位置、xterm 中实际执行的键盘输入、密码认证及拒绝、凭据持久化和无公开端口。可设置 `TUNNEL_CONSOLE_CAPTURE_PATH`，将返回的 PNG 保存到已有私有目录以目视检查，不要提交图片。协议测试覆盖异常帧、全帧覆盖、尺寸变化、输入限制、取消及释放事件。

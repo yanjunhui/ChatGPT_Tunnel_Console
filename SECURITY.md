@@ -5,7 +5,7 @@ English | [简体中文](SECURITY.zh-CN.md)
 
 ## Reporting
 
-Report vulnerabilities privately through [GitHub private vulnerability reporting](https://github.com/yanjunhui/ChatGPT_Tunnel_SSH/security/advisories/new). Include the affected version, a minimal synthetic reproduction, expected/actual behavior and impact. Do not post credentials, private configuration or exploitable details in public issues. Response times are best effort; this project has no contracted security SLA.
+Report vulnerabilities privately through [GitHub private vulnerability reporting](https://github.com/yanjunhui/ChatGPT_Tunnel_Console/security/advisories/new). Include the affected version, a minimal synthetic reproduction, expected/actual behavior and impact. Do not post credentials, private configuration or exploitable details in public issues. Response times are best effort; this project has no contracted security SLA.
 
 The latest code on `main` is maintained. Older releases do not have a separate backport commitment. A successful scan is evidence about the scanned revision and current advisory database, not a guarantee that the software has no vulnerabilities.
 
@@ -27,3 +27,11 @@ These documented capabilities are intentional. Unexpected credential disclosure,
 Use one tunnel instance per tunnel ID and runtime credentials scoped to that tunnel. Keep health listeners on loopback and do not publish SSH/MCP container ports. Preserve configuration and volume backups before changes. Use dedicated working directories and separate accounts/tunnels for different trust domains.
 
 Keep Go and dependencies patched; run `make vuln` and review dependency-update PRs. Never commit `data/`, `init-input/`, `secrets/`, `.env*` files other than the placeholder example, private keys, workspace files or raw acceptance evidence. Repository scans must use redacted output. Rotate exposed credentials through the issuing service; deleting a committed secret does not remove it from history.
+
+## Desktop access scope
+
+VNC is explicitly enabled per SSH profile. Screenshots can expose signed-in sessions, private files or application credentials, and input can perform actions allowed by the desktop account. Callers share that desktop; serialized tool calls do not provide tenant isolation or exclude other VNC clients. Read-only annotations do not redact screen content.
+
+The bundled desktop uses None authentication on loopback only, reached through SSH forwarding, with no published VNC port. Classic VncAuth's eight-byte password authentication does not replace encryption. SSH encrypts traffic only to the SSH host; if VNC is on another LAN host, that final segment is unencrypted. VNC TLS/VeNCrypt is unsupported, and the existing lack of SSH host-key verification still applies.
+
+Cancellation or network errors may follow partially delivered input. Releases are best effort and operations are not retried automatically. Inspect a fresh screenshot and verify results; successful input writes do not establish completion of a business operation.

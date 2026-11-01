@@ -60,6 +60,7 @@ jobs:
     env:
       TUNNEL_SSH_MCP_IMAGE: go-tunnel-ssh-mcp:ci
       TUNNEL_SSH_DEV_IMAGE: go-tunnel-ssh-dev:ci
+      TUNNEL_CONSOLE_DESKTOP_IMAGE: go-tunnel-console-desktop:ci
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -70,4 +71,4 @@ jobs:
           cache: false
       # Isolated fixtures use stdio; this job never starts an OpenAI tunnel.
       # 隔离夹具使用 stdio，此任务不启动 OpenAI 隧道。
-      - run: make docker-build docker-test
+      - run: make docker-build docker-test desktop-build desktop-test

@@ -7,13 +7,13 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY cmd ./cmd
 COPY internal ./internal
-RUN CGO_ENABLED=0 go build -trimpath -o /out/tunnel-ssh-mcp ./cmd/tunnel-ssh-mcp
+RUN CGO_ENABLED=0 go build -trimpath -o /out/tunnel-console-mcp ./cmd/tunnel-console-mcp
 
 FROM build AS tunnel
 # Download and verify the official bundle during build, not at runtime.
 # 构建时下载并校验官方发布包，运行时不再下载。
 ARG TUNNEL_CLIENT_VERSION=v0.0.19
-RUN /out/tunnel-ssh-mcp install-tunnel --version "${TUNNEL_CLIENT_VERSION}" --dir /out/tunnel
+RUN /out/tunnel-console-mcp install-tunnel --version "${TUNNEL_CLIENT_VERSION}" --dir /out/tunnel
 
 FROM debian:bookworm-slim AS runtime
 # The runtime image carries MCP and the tunnel; development tools stay in dev.
@@ -21,11 +21,12 @@ FROM debian:bookworm-slim AS runtime
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates tini \
     && rm -rf /var/lib/apt/lists/* \
     && useradd --create-home --uid 1000 mcp
-COPY --from=build /out/tunnel-ssh-mcp /usr/local/bin/tunnel-ssh-mcp
+COPY --from=build /out/tunnel-console-mcp /usr/local/bin/tunnel-console-mcp
 COPY --from=tunnel /out/tunnel/ /usr/local/bin/
+RUN ln -s tunnel-console-mcp /usr/local/bin/tunnel-ssh-mcp
 USER mcp
 WORKDIR /home/mcp
-ENTRYPOINT ["/usr/bin/tini", "--", "tunnel-ssh-mcp"]
+ENTRYPOINT ["/usr/bin/tini", "--", "tunnel-console-mcp"]
 CMD ["run", "--config", "/etc/tunnel-ssh/current/config.toml"]
 
 FROM debian:bookworm-slim AS dev
@@ -54,3 +55,12 @@ RUN chmod 755 /usr/local/bin/dev-entrypoint \
 ENV PATH="/usr/local/go/bin:${PATH}"
 WORKDIR /workspace
 ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/dev-entrypoint"]
+
+FROM dev AS desktop
+RUN apt-get -o Acquire::Retries=3 update && apt-get -o Acquire::Retries=3 install -y --no-install-recommends \
+    tigervnc-standalone-server tigervnc-tools openbox xterm x11-utils xdotool fonts-dejavu-core fonts-noto-cjk \
+    && rm -rf /var/lib/apt/lists/*
+COPY deploy/desktop-entrypoint.sh /usr/local/bin/desktop-entrypoint
+COPY deploy/desktop-session.sh /usr/local/bin/desktop-session
+RUN chmod 755 /usr/local/bin/desktop-entrypoint /usr/local/bin/desktop-session
+ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/desktop-entrypoint"]

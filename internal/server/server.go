@@ -9,12 +9,12 @@ import (
 	"fmt"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/yanjunhui/ChatGPT_Tunnel_SSH/internal/remote"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/remote"
 )
 
 // Version identifies both the CLI release and the MCP server implementation.
 // 中文：Version 同时标识 CLI 版本和 MCP 服务实现版本。
-const Version = "0.1.2"
+const Version = "0.2.0"
 
 type profileInput struct {
 	Profile string `json:"profile,omitempty"`
@@ -43,7 +43,7 @@ type signalInput struct {
 // 中文：New 创建无网络监听和额外鉴权中间件的 MCP 服务；调用者负责关闭 manager，
 // 外部调用方身份由 OpenAI 隧道验证。
 func New(manager *remote.Manager) *mcp.Server {
-	s := mcp.NewServer(&mcp.Implementation{Name: "openai-tunnel-ssh", Version: Version}, &mcp.ServerOptions{
+	s := mcp.NewServer(&mcp.Implementation{Name: "chatgpt-tunnel-console", Version: Version}, &mcp.ServerOptions{
 		Instructions: "SSH access through OpenAI Tunnel. Discover profiles first. Commands and paths have no application policy restrictions. Use run-command for independent commands; use open-session and write-session-input/read-session-output for persistent terminals. Tool filesystem paths refer to the MCP server or SSH host, not the ChatGPT client. All callers of this tunnel share named sessions.",
 	})
 	bind(s, "list-connections", "List configured SSH profiles; does not probe connectivity or expose credentials.", true,
@@ -53,6 +53,7 @@ func New(manager *remote.Manager) *mcp.Server {
 	bind(s, "run-command", "Execute any shell command or multiline script. Nonzero exits, timeouts and transport errors are reported. No command classification or approvals. Use sudo directly if the target account permits it.", false, manager.Run)
 	registerSessions(s, manager)
 	registerFiles(s, manager)
+	registerDesktop(s, manager)
 	bind(s, "signal-process", "Send INT, TERM or KILL to a positive process ID on a POSIX SSH host.", false,
 		func(ctx context.Context, in signalInput) (remote.CommandResult, error) {
 			return signal(ctx, manager, in)

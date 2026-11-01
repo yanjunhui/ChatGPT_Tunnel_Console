@@ -1,6 +1,6 @@
 // Created by Yanjunhui
-// Command tunnel-ssh-mcp installs services, runs the tunnel supervisor or serves MCP over stdio.
-// 中文：tunnel-ssh-mcp 命令用于服务安装、隧道启动及 stdio MCP 服务。
+// Command tunnel-console-mcp installs services, runs the tunnel supervisor or serves MCP over stdio.
+// 中文：tunnel-console-mcp 命令用于服务安装、隧道启动及 stdio MCP 服务。
 package main
 
 import (
@@ -13,17 +13,17 @@ import (
 	"syscall"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/yanjunhui/ChatGPT_Tunnel_SSH/internal/config"
-	"github.com/yanjunhui/ChatGPT_Tunnel_SSH/internal/remote"
-	"github.com/yanjunhui/ChatGPT_Tunnel_SSH/internal/server"
-	"github.com/yanjunhui/ChatGPT_Tunnel_SSH/internal/tunnel"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/config"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/remote"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/server"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/tunnel"
 )
 
 func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	if err := run(ctx, os.Args[1:]); err != nil && !errors.Is(err, context.Canceled) {
-		fmt.Fprintln(os.Stderr, "tunnel-ssh-mcp:", err)
+		fmt.Fprintln(os.Stderr, "tunnel-console-mcp:", err)
 		os.Exit(1)
 	}
 }
@@ -100,7 +100,7 @@ func install(ctx context.Context, args []string) error {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, `OpenAI Tunnel SSH MCP (Go)
+	fmt.Fprintln(os.Stderr, `ChatGPT Tunnel Console MCP (Go)
   init                          Initialize config, install and start a boot service
   init --config existing.toml    Import config and install/update the boot service
   init --container              Write persistent Docker config without a host service

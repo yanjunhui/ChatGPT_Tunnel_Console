@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/yanjunhui/ChatGPT_Tunnel_SSH/internal/remote"
-	"github.com/yanjunhui/ChatGPT_Tunnel_SSH/internal/testssh"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/remote"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/testssh"
 )
 
 func client(t *testing.T) *mcp.ClientSession {
@@ -51,8 +51,8 @@ func TestMCPDiscoveryAndCommand(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(list.Tools) != 13 {
-		t.Fatalf("expected 13 tools; got %d", len(list.Tools))
+	if len(list.Tools) != 17 {
+		t.Fatalf("expected 17 tools; got %d", len(list.Tools))
 	}
 	for _, tool := range list.Tools {
 		if tool.Name == "run-command" && tool.Annotations.ReadOnlyHint {

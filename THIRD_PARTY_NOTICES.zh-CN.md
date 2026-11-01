@@ -27,6 +27,7 @@ MCP SDK 的许可证声明说明其正在迁移许可：未取得重新许可同
 
 - [OpenAI tunnel-client v0.0.19](https://github.com/openai/tunnel-client/blob/v0.0.19/LICENSE) 采用 Apache-2.0，从官方发布下载；其发布包内的 [Cloudflare cloudflared](https://github.com/cloudflare/cloudflared/blob/master/LICENSE) 等组件保留各自许可条款。
 - Dockerfile 使用官方 Go、Node.js 和 Debian 镜像并安装 Debian 软件包。相关许可及源码提供要求继续适用，包括复制到开发镜像中的组件。
+- 可选桌面镜像安装 TigerVNC、Openbox、xterm、X11 工具和字体，均保留各自软件包许可；本项目 MIT 不重新许可这些组件。准确的许可证与版权清单位于构建镜像的 `/usr/share/doc/<package>/copyright`，重分发前须检查相关源码及声明义务。Go RFB 客户端由本项目独立实现，未内置第三方 VNC 客户端库。
 - govulncheck 与 Gitleaks 是单独下载的开发检查工具，版本固定于 Makefile，不属于 MCP 运行时。
 
 重新分发构建后的镜像或可执行文件前，应保留上游要求的版权、许可证及 NOTICE 文件，并满足适用的源码分发义务。本文是本次源码发布的清单，不能替代上游许可文本或完整二进制分发声明包。

@@ -6,17 +6,18 @@ English | [简体中文](CONTRIBUTING.zh-CN.md)
 Use Go at the version specified in `go.mod`, Python 3 for documentation checks, and Docker Compose v2 for container acceptance. Development is supported on macOS/Linux; the runtime targets POSIX SSH hosts.
 
 ```sh
-git clone https://github.com/yanjunhui/ChatGPT_Tunnel_SSH.git
-cd ChatGPT_Tunnel_SSH
+git clone https://github.com/yanjunhui/ChatGPT_Tunnel_Console.git
+cd ChatGPT_Tunnel_Console
 make check test vet build linux
 ```
 
-`make` keeps Go/module/build/temporary files in `.cache/`; generated binaries are in `bin/`. Do not commit either directory. `make test` runs real local SSH/SFTP and PTY tests, including race detection. It does not contact a live tunnel. The two Docker tests are opt-in:
+`make` keeps Go/module/build/temporary files in `.cache/`; generated binaries are in `bin/`. Do not commit either directory. `make test` runs real local SSH/SFTP and PTY tests, including race detection. It does not contact a live tunnel. Docker acceptance tests are opt-in:
 
 ```sh
 TUNNEL_SSH_MCP_IMAGE=go-tunnel-ssh-mcp:review \
 TUNNEL_SSH_DEV_IMAGE=go-tunnel-ssh-dev:review \
-make docker-build docker-test
+TUNNEL_CONSOLE_DESKTOP_IMAGE=go-tunnel-console-desktop:review \
+make docker-build docker-test desktop-build desktop-test
 ```
 
 Use separate image tags when a formal deployment exists. Tests create temporary containers and volumes, use stdio and synthetic credentials, and clean up their own resources. Never run `down -v` against a deployment with data you need.
@@ -39,3 +40,5 @@ Report ordinary defects through the issue form. For credential exposure or explo
 ## Licensing
 
 Contributions are accepted under the repository's [MIT license](LICENSE). Submit only code and documentation you have permission to contribute. Third-party components keep their own licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+Desktop acceptance verifies MCP image output, actual pointer position, keyboard input executed by xterm, password authentication and rejection, credential persistence, and no published ports. Optional `TUNNEL_CONSOLE_CAPTURE_PATH` saves the returned PNG to an existing private directory for visual inspection; do not commit it. Protocol tests cover malformed frames, full-frame coverage, resize, input limits, cancellation and release events.

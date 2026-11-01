@@ -180,3 +180,24 @@ Date: 2026-11-01 (Asia/Shanghai). This review prepares the public MIT source rep
 | Public content | Gitleaks v8.30.1 found no secrets in the staged source export. Private deployment identifiers were redacted; credentials, runtime data, binaries and raw logs are excluded. |
 
 Local evidence is retained under `.cache/public-release/` and is deliberately not published. GitHub Actions independently runs Linux/macOS checks and Linux Docker integration; consult the repository's Actions page for the status of a particular commit. Native boot-service installation and a new ChatGPT end-to-end run were not performed in this phase; the earlier 0.1.1 live acceptance remains a separate historical record.
+
+## 0.2.0 Console rename and VNC acceptance
+
+Date: 2026-11-01 (Asia/Shanghai). This is a source release, with separate candidate Docker image tags. The formal 0.1.1 containers retain their IDs, images, start times and zero restart counts; the existing supervisor's required control-plane-poll health check passes.
+
+| Check | Result |
+|---|---|
+| Configuration and initialization | Old profiles leave VNC disabled; defaults, invalid endpoints/timeouts/references, desktop wizard choice and persisted VNC credentials pass. Imported credentials remain usable after source files are removed. |
+| MCP contract | 17 discoverable tools, including four VNC tools; screenshot returns native PNG image content and structured width/height/name; only screenshots are annotated read-only among desktop tools. |
+| RFB protocol | 3.3/3.7/3.8, None/VncAuth, independent DES challenge vector, rejected authentication/no downgrade, malformed rectangles, overlapping/partial frames, resize and complete pixel coverage pass. |
+| Inputs and lifecycle | Pointer/chord/text bounds, ordered press/release, CRLF, cancellation, deadline and manager shutdown over real SSH forwarding pass. |
+| Real desktop | MCP stdio → OpenSSH → TigerVNC returns 1280×800 PNGs; actual pointer reaches (100,100); MCP keyboard input runs a command in xterm whose file reads back `VNC_KEYBOARD_OK\n`. A returned screenshot was visually inspected. |
+| Authentication | A second real TigerVNC server returns a 64×48 PNG with the correct persisted password, rejects a wrong password and does not echo password values. |
+| Docker deployment | Base SSH/SFTP/PTY/init regression and the desktop Compose overlay pass on Linux arm64. Desktop health checks SSH/X display; no VNC/SSH/MCP host ports are published. Temporary resources are cleaned. |
+| Local checks | Full race suite, vet, native macOS arm64 build and Linux arm64/amd64 cross-builds pass; module tidy adds no dependency. 30 Markdown files form 15 checked bilingual pairs; 63 Go files pass declaration/comment/function limits. |
+| Fuzzing | Ten-second RFB handshake fuzz run: 8,291,917 executions, no crash. This is bounded fuzz evidence, not exhaustive protocol proof. |
+| Security review | No reachable or imported-package Go vulnerabilities; the previously recorded module-only OpenPGP advisory remains. Redacted history and publication-source scans are part of release validation. |
+
+A window-title lookup initially failed because the terminal shell rewrites its title; acceptance now locates the visible XTerm class. A later Docker Desktop configuration-permission assertion failed once without a diagnostic. The test now prints safe ownership/mode information on failure; its subsequent full run passed. No permission relaxation or retry workaround was added, and the single transient failure's cause is unconfirmed.
+
+Evidence is private under `.cache/console-vnc/`, including the returned desktop PNG and test/build/scan logs. The public repository is now `ChatGPT_Tunnel_Console`; deployment identifiers are retained for upgrade compatibility. GitHub Actions checks Linux/macOS and Docker independently for each commit. No real ChatGPT VNC call, formal 0.2.0 upgrade, external desktop installation, reboot recovery or network-failure reconnection was performed in this stage. Earlier 0.1.1 live tunnel acceptance remains separate.

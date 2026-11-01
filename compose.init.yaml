@@ -11,7 +11,7 @@ services:
     user: "0:0"
     # One-shot root setup assigns persisted files to the non-root runtime account.
     # 一次性 root 初始化将持久化文件归属设为非 root 运行账户。
-    entrypoint: ["/usr/bin/tini", "--", "tunnel-ssh-mcp", "init", "--container", "--output", "/etc/tunnel-ssh", "--owner-uid", "1000", "--owner-gid", "1000"]
+    entrypoint: ["/usr/bin/tini", "--", "tunnel-console-mcp", "init", "--container", "--output", "/etc/tunnel-ssh", "--owner-uid", "1000", "--owner-gid", "1000"]
     command: []
     stdin_open: true
     tty: true

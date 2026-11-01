@@ -18,6 +18,7 @@ type dockerInitRig struct {
 	root, data, input string
 	project           string
 	env               []string
+	desktop           bool
 }
 
 func newDockerInitRig(t *testing.T) dockerInitRig {
@@ -50,7 +51,11 @@ func (r dockerInitRig) command(ctx context.Context, init bool, args ...string) *
 	if init {
 		file = "compose.init.yaml"
 	}
-	cmd := exec.CommandContext(ctx, "docker", append([]string{"compose", "-p", r.project, "-f", filepath.Join(r.root, file)}, args...)...)
+	options := []string{"compose", "-p", r.project, "-f", filepath.Join(r.root, file)}
+	if r.desktop && !init {
+		options = append(options, "-f", filepath.Join(r.root, "compose.desktop.yaml"))
+	}
+	cmd := exec.CommandContext(ctx, "docker", append(options, args...)...)
 	cmd.Env, cmd.Dir = r.env, r.root
 	return cmd
 }
@@ -121,8 +126,8 @@ func (r dockerInitRig) checkPersistentConfiguration(t *testing.T) {
 test "$(id -u)" = 1000
 test "$(id -g)" = 1000
 for f in /etc/tunnel-ssh/current/config.toml /etc/tunnel-ssh/current/secrets/tunnel-key; do
-  test -r "$f"
-  test "$(stat -c '%u:%g:%a' "$f")" = '1000:1000:600'
+  test -r "$f" || { echo "Configuration file is not readable"; stat -c '%u:%g:%a' "$f"; exit 1; }
+  test "$(stat -c '%u:%g:%a' "$f")" = '1000:1000:600' || { echo "Unexpected configuration permissions"; stat -c '%u:%g:%a' "$f"; exit 1; }
 done
 if touch /etc/tunnel-ssh/write-test 2>/dev/null; then exit 1; fi
 `
@@ -150,7 +155,7 @@ func (r dockerInitRig) checkWorker(t *testing.T) {
 	}
 	defer c.Close()
 	tools, err := c.ListTools(ctx, nil)
-	if err != nil || len(tools.Tools) != 13 {
+	if err != nil || len(tools.Tools) != 17 {
 		t.Fatalf("tool discovery: %+v %v", tools, err)
 	}
 	dockerCheckCommand(t, ctx, c)

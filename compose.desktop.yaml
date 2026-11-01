@@ -1,0 +1,10 @@
+# Created by Yanjunhui
+# Optional overlay: docker compose -f compose.yaml -f compose.desktop.yaml up -d --build
+# 可选叠加配置：使用以上命令启用桌面；沿用现有项目和持久化卷。
+services:
+  dev:
+    image: ${TUNNEL_CONSOLE_DESKTOP_IMAGE:-go-tunnel-console-desktop:latest}
+    build:
+      target: desktop
+    healthcheck:
+      test: ["CMD-SHELL", "ssh -i /var/lib/tunnel-ssh/client_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o BatchMode=yes developer@127.0.0.1 'DISPLAY=:1 xdpyinfo >/dev/null'"]
