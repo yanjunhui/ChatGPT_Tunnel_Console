@@ -68,3 +68,48 @@ func FuzzXWD(f *testing.F) {
 	f.Add([]byte{})
 	f.Fuzz(func(t *testing.T, data []byte) { _, _, _ = XWD(bytes.NewReader(data)) })
 }
+
+func directColorFixture() []byte {
+	data := xwdFixture(0, 24)
+	binary.BigEndian.PutUint32(data[13*4:], 5)
+	binary.BigEndian.PutUint32(data[19*4:], 256)
+	result := append([]byte{}, data[:104]...)
+	for i := range 256 {
+		var entry [12]byte
+		binary.BigEndian.PutUint32(entry[:4], uint32(i)*0x010101)
+		for offset := 4; offset <= 8; offset += 2 {
+			binary.BigEndian.PutUint16(entry[offset:], uint16(i)*257)
+		}
+		result = append(result, entry[:]...)
+	}
+	return append(result, data[116:]...)
+}
+
+func TestXWDMixedVisualIdentityDirectColor(t *testing.T) {
+	fixture := directColorFixture()
+	data, _, err := XWD(bytes.NewReader(fixture))
+	if err != nil {
+		t.Fatal(err)
+	}
+	frame, err := png.Decode(bytes.NewReader(data))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for x := range 2 {
+		if color.RGBAModel.Convert(frame.At(x, 0)) != (color.RGBA{1, 2, 3, 255}) {
+			t.Fatal("mixed visual pixel changed")
+		}
+	}
+	for _, offset := range []int{18*4 + 3, 19*4 + 3, 104 + 12, 104 + 4} {
+		bad := append([]byte{}, fixture...)
+		bad[offset] ^= 1
+		if image, _, err := XWD(bytes.NewReader(bad)); err == nil || image != nil {
+			t.Fatal("invalid DirectColor accepted")
+		}
+	}
+	for _, n := range []int{104, 105, 104 + 256*12 - 1, len(fixture) - 1} {
+		if _, _, err := XWD(bytes.NewReader(fixture[:n])); err == nil {
+			t.Fatal("truncated DirectColor accepted")
+		}
+	}
+}

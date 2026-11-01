@@ -139,7 +139,7 @@ list-sessions        {}
 
 ## 原生桌面工具
 
-`desktop-screenshot`、`desktop-pointer`、`desktop-key` 和 `desktop-type` 使用与下表 VNC 工具相同的参数、返回结构及输入边界；需要 `desktop.enabled = true`，不读取 VNC 配置或连接 VNC。每次操作通过 SSH 调用目标机的 `xwd` 或 `xdotool`；截图只接受 24 位 TrueColor、24/32 位存储的 XWD 并转换为原尺寸 PNG。只支持 Linux X11，不支持原生 Wayland/macOS/Windows 桌面；外部目标须具备显示权限、工具及 C.UTF-8。失败会返回工具错误，部分输入可能已发生，不自动切换 VNC 或重试。两条路径在同一 MCP 进程内共用操作队列，以防手势交错并限制图片内存；配置开关、目标、超时及服务生命周期独立。详见[原生桌面指南](desktop.zh-CN.md)。
+`desktop-screenshot`、`desktop-pointer`、`desktop-key` 和 `desktop-type` 使用与下表 VNC 工具相同的参数、返回结构及输入边界；需要 `desktop.enabled = true`，不读取 VNC 配置或连接 VNC。每次操作通过 SSH 调用目标机的 `xwd` 或 `xdotool`；截图只接受 24 位 TrueColor 或恒等映射 DirectColor、24/32 位存储的 XWD 并转换为原尺寸 PNG。只支持 Linux X11，不支持原生 Wayland/macOS/Windows 桌面；外部目标须具备显示权限、工具及 C.UTF-8。失败会返回工具错误，部分输入可能已发生，不自动切换 VNC 或重试。两条路径在同一 MCP 进程内共用操作队列，以防手势交错并限制图片内存；配置开关、目标、超时及服务生命周期独立。详见[原生桌面指南](desktop.zh-CN.md)。
 
 ## VNC 桌面工具
 

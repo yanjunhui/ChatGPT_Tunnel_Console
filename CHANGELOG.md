@@ -5,6 +5,7 @@ English | [简体中文](CHANGELOG.zh-CN.md)
 
 ## 0.3.3 — 2026-11-01
 
+- Accept identity-mapped DirectColor XWD produced by mixed-visual Xfce desktops, validating the complete color table before decoding.
 - Add ChatGPT attachment uploads through `openai/fileParams`, keeping local-path uploads compatible. Validate HTTPS destinations and public DNS addresses, redact signed URLs, cap attachment staging at 512 MiB, and publish through atomic SFTP rename.
 - Add regression tests and bilingual attachment documentation.
 
