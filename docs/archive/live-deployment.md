@@ -3,9 +3,11 @@
 
 English | [简体中文](live-deployment.zh-CN.md)
 
+> Historical record: this document describes the implementation and checks for the version or phase named below. For current setup and usage, see the [documentation](../README.md).
+
 Date: 2026-11-01 (Asia/Shanghai). Project: `ChatGPT_Tunnel_Console`.
 
-## Current deployment: 0.3.2
+## Recorded deployment: 0.3.2
 
 The formal MCP runtime reached **0.3.2** at 20:16:44 on 2026-11-01. The bundled native X11 desktop and separately managed VNC service use the tested 0.3.0 images; only MCP changed for the 0.3.1 screenshot and 0.3.2 Unicode fixes. Existing tunnel credentials, SSH identity, workspace and developer home were retained. There are no published host ports.
 
@@ -27,9 +29,9 @@ The formal MCP runtime reached **0.3.2** at 20:16:44 on 2026-11-01. The bundled 
 
 The screenshot A/B comparison and initial Unicode failure are preserved in the [verification record](verification.md). They were actual acceptance failures that required fixes, not successful checks. Input acknowledgment alone is never used as proof that an application processed the input. These results cover the bundled Linux X11 desktop, not native macOS/Windows/Wayland desktops, host reboot or network-outage recovery.
 
-### Current operation and rollback
+### Operation and rollback at that revision
 
-The local `.env` selects all three Compose files and explicit image tags. Use `docker compose stop vnc` / `docker compose start vnc` to manage only the optional service; `desktop-*` remains independent of it. Both backends still use SSH and share the X display supplied by dev. See [the desktop guide](desktop.md) for native-only configuration and external VNC targets.
+The local `.env` selects all three Compose files and explicit image tags. Use `docker compose stop vnc` / `docker compose start vnc` to manage only the optional service; `desktop-*` remains independent of it. Both backends still use SSH and share the X display supplied by dev. See [the desktop guide](../desktop.md) for native-only configuration and external VNC targets.
 
 Private backups and evidence are in `.cache/upgrade-0.3.0/`: the pre-upgrade `data`/workspace archive, developer-home/SSH-identity volume archive, prior environment files, container snapshots, activation logs, health results and ChatGPT evidence. Prior 0.2.0/0.3.0/0.3.1 images are retained. A runtime-only rollback requires stopping MCP, restoring the selected image tag in `.env`, then recreating only MCP with `--no-deps --no-build --pull never`; it ends in-memory sessions. Older versions restore their documented screenshot/Unicode limitations. A full 0.2.0 rollback also requires its matching configuration generation and two-file Compose setup. No successful-upgrade rollback drill was performed.
 

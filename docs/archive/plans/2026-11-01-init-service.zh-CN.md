@@ -3,6 +3,8 @@
 
 [English](2026-11-01-init-service.md) | 简体中文
 
+> 历史记录：本文描述标题所列版本或阶段的实现与验证情况。当前安装与使用方法请参阅[文档中心](../../README.zh-CN.md)。
+
 历史实施计划。文中验收状态以当时阶段为准；当前部署状态见 [部署记录](../live-deployment.zh-CN.md)。
 
 目标：原生 Go CLI 增加 `init`，首次引导填写隧道/SSH 配置，自动安装并启动 macOS launchd / Linux systemd 系统服务。用户已确认采用原生 Go 服务。

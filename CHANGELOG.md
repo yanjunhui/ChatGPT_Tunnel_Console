@@ -50,7 +50,7 @@ MCP tool contracts remain compatible with 0.1.1. This source release does not au
 ## 0.1.1 — 2026-11-01
 
 - Add `outputSchema` and typed `structuredContent` to inline SFTP downloads while retaining the existing text JSON response, including explicit empty-file values.
-- Verify the formal container upgrade through actual tunnel, SSH and SFTP calls. See [verification](docs/verification.md).
+- Verify the formal container upgrade through actual tunnel, SSH and SFTP calls. See [verification](docs/archive/verification.md).
 - Complete English documentation and Simplified Chinese companions, with bilingual source comments.
 
 ## 0.1.0 — 2026-11-01

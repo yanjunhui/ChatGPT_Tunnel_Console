@@ -1,9 +1,9 @@
 <!-- Created by Yanjunhui -->
 # Configuration and CLI reference
 
-English | [简体中文](configuration.zh-CN.md) | [README](../README.md)
+English | [简体中文](configuration.zh-CN.md) | [Documentation](README.md)
 
-This reference describes the repository's 0.3.3 implementation. See `internal/config`, `internal/setup`, `internal/tunnel` and `cmd/tunnel-console-mcp` for the corresponding code. Examples use placeholders, never real credentials.
+Configure SSH profiles, credentials and tunnel settings in TOML. This reference covers version 0.3.3. For a guided setup, start with [installation](installation.md); the examples below use placeholder values.
 
 ## TOML configuration
 
@@ -130,4 +130,4 @@ docker compose exec -T mcp tunnel-console-mcp version
 docker compose exec -T mcp tunnel-client health --port 8080 --require-control-plane-poll --json
 ```
 
-The health port must match the configured listener. Readiness may precede the first successful control-plane poll; require the poll check and inspect startup logs. Calling `doctor` inside the running container can conflict with the occupied diagnostics port; the deployment record used an independent one-shot diagnostic container. Finally verify actual MCP tool calls through ChatGPT. Keep local stdio tests, tunnel health and end-to-end results separate in reports.
+The health port must match the configured listener. Readiness may precede the first successful control-plane poll; require the poll check and inspect startup logs. Use the health command above for a running container: `doctor` can conflict with its occupied diagnostics port. After checking health, run a command through the plugin to verify SSH connectivity.

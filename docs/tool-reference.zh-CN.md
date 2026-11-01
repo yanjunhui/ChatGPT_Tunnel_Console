@@ -1,9 +1,9 @@
 <!-- Created by Yanjunhui -->
 # MCP 工具参考
 
-[English](tool-reference.md) | 简体中文 | [README](../README.zh-CN.md)
+[English](tool-reference.md) | 简体中文 | [文档中心](README.zh-CN.md)
 
-适用于 0.3.3。工具注册位于 `internal/server/server.go`，参数、返回类型和实现位于 `internal/remote`。下文 JSON 名称均为实际公共契约；配置默认值见[配置参考](configuration.zh-CN.md)。
+本文列出 0.3.3 中全部 21 个 MCP 工具的输入参数、成功结果和错误。常见操作见[使用指南](usage.zh-CN.md)，默认值和连接设置见[配置参考](configuration.zh-CN.md)。
 
 ## 通用约定
 
@@ -154,4 +154,4 @@ list-sessions        {}
 
 截图仅在全帧覆盖后返回原尺寸 PNG：单边最多 8192、总像素最多 8,388,608、PNG 最多 16 MiB。鼠标坐标从左上角开始，发送前验证整批事件位于当前桌面；按钮位左1／中2／右4／上滚8／下滚16，0释放，结束时自动释放。组合键依次按下、逆序释放。文本通过按键发送，CRLF 视为一次 Return，CR/LF 和 Tab 受支持；无效 UTF-8 和其他控制字符拒绝，不使用剪贴板。输入结果只确认事件写入，须重新截图确认应用状态。仅截图标注只读；键鼠工具非只读。
 
-从 0.3.1 起，两种截图工具省略 `outputSchema` 和仅含元数据的 `structuredContent`，因为真实 ChatGPT 在同时存在该结构化输出时只显示尺寸、遮蔽图片。原有图片及文本内容块保持不变；此前依赖结构化截图尺寸的客户端应改为解析 `content[1].text`。SFTP 下载仍保留类型化结构化结果。
+客户端应显示 `content[0]` 中的截图，并从 `content[1].text` 解析尺寸。截图工具不返回 `structuredContent`，SFTP 下载同时返回文本 JSON 和类型化结构化结果。

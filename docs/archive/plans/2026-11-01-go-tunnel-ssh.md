@@ -3,6 +3,8 @@
 
 English | [简体中文](2026-11-01-go-tunnel-ssh.zh-CN.md)
 
+> Historical record: this document describes the implementation and checks for the version or phase named below. For current setup and usage, see the [documentation](../../README.md).
+
 Historical plan. Acceptance statements describe that stage; see the [deployment record](../live-deployment.md) for subsequent live status.
 
 **Goal:** independently implement a Go SSH MCP service exposed only through OpenAI Tunnel, with a Docker Linux development environment.

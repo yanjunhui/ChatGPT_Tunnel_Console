@@ -3,6 +3,8 @@
 
 [English](2026-11-01-go-tunnel-ssh.md) | 简体中文
 
+> 历史记录：本文描述标题所列版本或阶段的实现与验证情况。当前安装与使用方法请参阅[文档中心](../../README.zh-CN.md)。
+
 历史实施计划。文中验收状态以当时阶段为准；当前部署状态见 [部署记录](../live-deployment.zh-CN.md)。
 
 **目标：** 独立用 Go 实现仅经 OpenAI 隧道对外使用的 SSH MCP，附带 Docker Linux 开发环境。

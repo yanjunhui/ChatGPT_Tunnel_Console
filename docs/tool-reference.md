@@ -1,9 +1,9 @@
 <!-- Created by Yanjunhui -->
 # MCP tool reference
 
-English | [简体中文](tool-reference.zh-CN.md) | [README](../README.md)
+English | [简体中文](tool-reference.zh-CN.md) | [Documentation](README.md)
 
-Applies to 0.3.3. Tool registration is in `internal/server/server.go`; input/result types and operations are in `internal/remote`. JSON names below are the actual public contract. Configuration defaults are documented in [configuration.md](configuration.md).
+Input parameters, successful results and errors for all 21 MCP tools in version 0.3.3. For common workflows, see the [usage guide](usage.md); defaults and profile settings are in the [configuration reference](configuration.md).
 
 ## Shared conventions
 
@@ -154,4 +154,4 @@ All four tools accept optional `profile`, require `vnc.enabled = true`, and use 
 
 Screenshots return native PNG only after full-frame coverage: at most 8192 per side, 8,388,608 total pixels and 16 MiB encoded PNG. Pointer coordinates start at the top left; the entire batch is validated against the current desktop before sending. Button bits are left 1/middle 2/right 4/up-scroll 8/down-scroll 16, zero releases, and a final release is automatic. Chords press in order and release in reverse. Text uses key events, treats CRLF as one Return and supports CR/LF and Tab; invalid UTF-8 and other controls fail. Clipboard is not used. Input results acknowledge writes only; capture again to confirm application state. Only screenshots are annotated read-only; input tools are not.
 
-Since 0.3.1, both screenshot tools omit `outputSchema` and metadata-only `structuredContent`: real ChatGPT exposed only the dimensions and hid the image when that structured result was present. Existing image and text content blocks remain unchanged. Clients previously reading structured screenshot dimensions should parse `content[1].text` instead. SFTP downloads retain their typed structured results.
+Screenshot clients should display the image in `content[0]` and parse dimensions from `content[1].text`. Screenshot tools do not return `structuredContent`. SFTP downloads return both text JSON and typed structured results.

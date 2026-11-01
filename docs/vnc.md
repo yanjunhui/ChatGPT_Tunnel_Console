@@ -1,9 +1,9 @@
 <!-- Created by Yanjunhui -->
 # VNC desktop over MCP
 
-English | [简体中文](vnc.zh-CN.md) | [README](../README.md)
+English | [简体中文](vnc.zh-CN.md) | [Documentation](README.md)
 
-Version 0.2.0 adds desktop screenshots and input to the existing SSH/SFTP console. The transport is **OpenAI MCP tunnel → Go MCP server → SSH direct-tcpip → VNC server**. The official tunnel carries MCP messages, including PNG image content; it is not a native VNC/TCP tunnel. There is no web viewer or public VNC listener.
+The VNC tools let you capture and control a compatible desktop through the configured SSH host. The transport is **OpenAI MCP tunnel → Go MCP server → SSH direct-tcpip → VNC server**. The official tunnel carries MCP messages, including PNG image content; it is not a native VNC/TCP tunnel. There is no web viewer or public VNC listener.
 
 ## Bundled Docker desktop
 
@@ -15,9 +15,9 @@ docker compose -f compose.init.yaml run --rm --build init
 docker compose -f compose.yaml -f compose.desktop.yaml -f compose.vnc.yaml up -d --build
 ```
 
-Since 0.3.0, `compose.desktop.yaml` supplies Xvfb/Openbox/xterm and native desktop tools without installing VNC. `compose.vnc.yaml` adds a separate x11vnc service that shares the X11 socket and development container's network namespace. The 1280×800 display `:1` is shared by both paths; VNC listens on loopback port 5901. No host ports are published. Keep all three Compose files in subsequent management commands. Stop or restart `vnc` independently; native tools remain operational. The SSH identity, developer home and workspace remain unchanged. See [native desktop operation](desktop.md).
+`compose.desktop.yaml` supplies Xvfb/Openbox/xterm and native desktop tools without installing VNC. `compose.vnc.yaml` adds a separate x11vnc service that shares the X11 socket and development container's network namespace. The 1280×800 display `:1` is shared by both paths; VNC listens on loopback port 5901. No host ports are published. Keep all three Compose files in subsequent management commands. Stop or restart `vnc` independently; native tools remain operational. The SSH identity, developer home and workspace remain unchanged. See [native desktop operation](desktop.md).
 
-For an existing deployment, back up the complete configuration and persistent volumes, stop MCP, then run the initializer with `--reconfigure`, choose 3, and start with the overlay. Reconfiguration replaces the profile selection; import a complete TOML instead if multiple existing profiles must be retained. Initialization alone neither starts nor tests VNC. Do not run two supervisors for the same tunnel ID. Existing paths, Compose project identity and environment variables retain their prior names; see [upgrade compatibility](../README.md#name-and-upgrade-compatibility).
+For an existing deployment, back up the complete configuration and persistent volumes, stop MCP, then run the initializer with `--reconfigure`, choose 3, and start with the overlay. Reconfiguration replaces the profile selection; import a complete TOML instead if multiple existing profiles must be retained. Initialization alone neither starts nor tests VNC. Do not run two supervisors for the same tunnel ID. Existing paths, Compose project identity and environment variables retain their prior names; see [upgrade compatibility](installation.md#tool-discovery-and-compatibility).
 
 ## Existing VNC server
 
@@ -84,7 +84,5 @@ Input success returns text JSON with `desktop` metadata and `message`; it only c
 The screenshot bounds protect server memory; client/tunnel message limits may be lower, particularly because base64 adds overhead. Use a smaller desktop if a client rejects a large screenshot. There is no video stream, image scaling, clipboard synchronization, sound, browser UI or cross-call key hold. Screenshots omit the local viewer cursor overlay.
 
 If VNC is disabled, verify the active configuration and restart MCP. If SSH forwarding fails, check SSH `AllowTcpForwarding`, the target address and the running VNC listener. For unsupported authentication, configure None on protected loopback or VncAuth over SSH. An out-of-bounds pointer error requires a fresh screenshot; resize can change the desktop between calls. Authentication and frame errors return MCP `isError: true` without a successful image payload.
-
-Local acceptance uses real x11vnc, OpenSSH, xterm and an MCP stdio client. It verifies screenshot decoding, actual pointer coordinates and keyboard effects, authentication, cleanup and unpublished ports. This does not itself prove a real ChatGPT application has discovered or displayed the new tools; that requires upgrading the intended deployment and making actual tunnel calls.
 
 Protocol references: [RFB specification](https://github.com/rfbproto/rfbproto/blob/master/rfbproto.rst), [x11vnc server](https://github.com/LibVNC/x11vnc), [official tunnel configuration](https://github.com/openai/tunnel-client/blob/v0.0.19/docs/configuration.md).

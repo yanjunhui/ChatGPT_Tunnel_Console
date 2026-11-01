@@ -1,9 +1,9 @@
 <!-- Created by Yanjunhui -->
-# 原生桌面与独立 VNC
+# 原生 Linux 桌面
 
-[English](desktop.md) | 简体中文 | [README](../README.zh-CN.md)
+[English](desktop.md) | 简体中文 | [文档中心](README.zh-CN.md)
 
-从 0.3.0 起，ChatGPT_Tunnel_Console 通过自身的 `desktop-*` MCP 工具提供截图和键鼠操作，无需 VNC 服务。用户启动本项目后即可通过 ChatGPT/Codex 操作，不必另装查看器。可选 `vnc-*` 工具提供第二条独立配置的路径，两者不会自动互相回退。
+使用 `desktop-*` 工具，在 ChatGPT 或 Codex 中截取 Linux X11 桌面并操作鼠标和键盘。原生后端通过 SSH 工作，无需 VNC 服务或独立查看器。可选 `vnc-*` 工具可连接同一桌面或另一个兼容的 VNC 服务。
 
 | 能力 | 原生桌面 | 可选 VNC |
 |---|---|---|
@@ -36,7 +36,7 @@ display = ":1"
 timeout = "15s"
 ```
 
-使用 `compose.init.yaml` 加 `--non-interactive --config /input/config.toml` 导入，再用桌面叠加配置启动。已有配置不会隐式启用任一后端。外部 Linux 目标需安装工具，并确保 SSH 账户已有所选 X 显示服务及其认证环境的访问权限；不要为使探测通过而大范围关闭显示访问控制。
+使用 `compose.init.yaml` 加 `--non-interactive --config /input/config.toml` 导入，再用桌面叠加配置启动。已有配置不会隐式启用任一后端。外部 Linux 目标需安装工具，并确保 SSH 账户已有所选 X 显示服务及其认证环境的访问权限；保留显示访问控制，仅向目标账户授予访问权限。
 
 ## 添加或停止补充 VNC
 
@@ -80,6 +80,6 @@ desktop-screenshot  {"profile":"local-dev"}
 
 两条路径均限制鼠标事件 1–256、组合键 1–16、Unicode 字符 1–4096、截图单边 8192 像素、总像素 8,388,608、PNG 16 MiB，默认操作期限 15 秒（最多 120 秒）。键名、按钮位及错误语义见[工具参考](tool-reference.zh-CN.md)。原生截图要求 24 位 TrueColor 或恒等映射 DirectColor、24/32 位存储，非法或截断帧报错，不返回部分图片。Unicode 呈现仍受目标应用和输入法影响。
 
-若升级后 ChatGPT 报告缺少新工具，应在已有应用管理页刷新工具，再检查发现结果。本地测试和隧道健康并不证明 ChatGPT 已发现新版契约，不要为此另起同一 ID 的隧道监督进程。
+升级后缺少工具时，参阅[工具发现排查](troubleshooting.zh-CN.md#工具或参数仍然是旧版)。
 
 原生输入对 ASCII 使用 12 毫秒间隔；调用包含非 ASCII 文本或按键时使用 100 毫秒，为应用处理临时 Unicode 映射留出时间。此举改善应用短暂延迟时的送达，不保证无响应应用能接收输入；应验证实际结果，不盲目重试。非 ASCII 文本应拆为短段（默认期限建议每段约 100 字），或增大 `desktop.timeout` 至最多 120 秒。4096 字符是参数上限，不保证单次调用在期限内完成。

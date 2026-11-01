@@ -3,6 +3,8 @@
 
 English | [简体中文](2026-11-01-console-vnc.zh-CN.md)
 
+> Historical record: this document describes the implementation and checks for the version or phase named below. For current setup and usage, see the [documentation](../../README.md).
+
 **Goal:** Rename the public project to ChatGPT_Tunnel_Console and let ChatGPT/Codex view and operate a VNC desktop through MCP screenshots and input tools.
 
 **Architecture:** Keep the official OpenAI MCP tunnel. Each enabled SSH profile may describe a VNC target reached using SSH direct TCP forwarding. Bounded RFB clients make shared, short-lived connections; no public VNC listener or browser viewer is added. Existing SSH/SFTP interfaces remain compatible.

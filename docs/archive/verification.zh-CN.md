@@ -3,6 +3,8 @@
 
 [English](verification.md) | 简体中文
 
+> 历史记录：本文描述标题所列版本或阶段的实现与验证情况。当前安装与使用方法请参阅[文档中心](../README.zh-CN.md)。
+
 日期：2026-11-01（Asia/Shanghai）。正式运行状态以 live-deployment.zh-CN.md 为准；下方早期快照对应 0.1.0，最新升级验收记录在文末。
 
 前半部分保留初版交付快照；原生 `init`、Docker 初始化和下载返回兼容性的增量验证分别记录在文末。各节的未验收范围只描述该阶段；真实隧道的后续进度以 [部署记录](live-deployment.zh-CN.md) 为准。

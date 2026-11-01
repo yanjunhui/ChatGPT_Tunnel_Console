@@ -3,6 +3,8 @@
 
 [English](2026-11-01-console-vnc.md) | 简体中文
 
+> 历史记录：本文描述标题所列版本或阶段的实现与验证情况。当前安装与使用方法请参阅[文档中心](../../README.zh-CN.md)。
+
 **目标：** 将公开项目更名为 ChatGPT_Tunnel_Console，使 ChatGPT/Codex 通过 MCP 截图及输入工具查看和操作 VNC 桌面。
 
 **架构：** 保留官方 OpenAI MCP 隧道。SSH 配置可选提供 VNC 目标，通过 SSH 直接 TCP 转发访问。具有资源边界的 RFB 客户端使用共享、短时连接，不新增公网 VNC 监听或浏览器查看器，现有 SSH/SFTP 接口保持兼容。

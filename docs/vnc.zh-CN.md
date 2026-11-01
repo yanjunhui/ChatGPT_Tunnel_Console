@@ -1,9 +1,9 @@
 <!-- Created by Yanjunhui -->
 # 通过 MCP 操作 VNC 桌面
 
-[English](vnc.md) | 简体中文 | [README](../README.zh-CN.md)
+[English](vnc.md) | 简体中文 | [文档中心](README.zh-CN.md)
 
-0.2.0 为现有 SSH/SFTP 控制台增加桌面截图和输入。链路为 **OpenAI MCP 隧道 → Go MCP 服务 → SSH direct-tcpip → VNC 服务**。官方隧道传输包含 PNG 图片内容的 MCP 消息，不是原生 VNC/TCP 隧道；没有网页查看器或公开 VNC 监听端口。
+VNC 工具通过配置的 SSH 主机连接兼容桌面，提供截图和输入操作。链路为 **OpenAI MCP 隧道 → Go MCP 服务 → SSH direct-tcpip → VNC 服务**。官方隧道传输包含 PNG 图片内容的 MCP 消息，不是原生 VNC/TCP 隧道；没有网页查看器或公开 VNC 监听端口。
 
 ## 自带 Docker 桌面
 
@@ -15,9 +15,9 @@ docker compose -f compose.init.yaml run --rm --build init
 docker compose -f compose.yaml -f compose.desktop.yaml -f compose.vnc.yaml up -d --build
 ```
 
-从 0.3.0 起，`compose.desktop.yaml` 提供 Xvfb/Openbox/xterm 及原生桌面工具，不安装 VNC；`compose.vnc.yaml` 单独添加 x11vnc 服务，共享 X11 socket 和开发容器网络命名空间。两条路径共用 1280×800 的 `:1` 桌面，VNC 仅监听回环端口 5901，不发布宿主机端口。后续管理命令保留三个 Compose 文件，可单独停止或重启 `vnc`，原生工具仍可使用。SSH 身份、开发主目录和工作区保持不变，详见[原生桌面操作](desktop.zh-CN.md)。
+`compose.desktop.yaml` 提供 Xvfb/Openbox/xterm 及原生桌面工具，不安装 VNC；`compose.vnc.yaml` 单独添加 x11vnc 服务，共享 X11 socket 和开发容器网络命名空间。两条路径共用 1280×800 的 `:1` 桌面，VNC 仅监听回环端口 5901，不发布宿主机端口。后续管理命令保留三个 Compose 文件，可单独停止或重启 `vnc`，原生工具仍可使用。SSH 身份、开发主目录和工作区保持不变，详见[原生桌面操作](desktop.zh-CN.md)。
 
-已有部署应先备份完整配置和持久卷，停止 MCP，再以 `--reconfigure` 运行初始化向导，选择 3 后用叠加配置启动。重新配置会替换连接选择；若需要保留已有多配置，应导入完整 TOML。初始化本身既不启动也不测试 VNC。同一个隧道 ID 不要运行两个监督进程。原路径、Compose 项目标识和环境变量保留旧名称，见[升级兼容说明](../README.zh-CN.md#更名与升级兼容)。
+已有部署应先备份完整配置和持久卷，停止 MCP，再以 `--reconfigure` 运行初始化向导，选择 3 后用叠加配置启动。重新配置会替换连接选择；若需要保留已有多配置，应导入完整 TOML。初始化本身既不启动也不测试 VNC。同一个隧道 ID 不要运行两个监督进程。原路径、Compose 项目标识和环境变量保留旧名称，见[升级兼容说明](installation.zh-CN.md#工具发现与兼容性)。
 
 ## 已有 VNC 服务
 
@@ -84,7 +84,5 @@ vnc-pointer {"events":[{"x":300,"y":250,"buttons":16},{"x":300,"y":250,"buttons"
 截图边界用于限制服务端内存，客户端／隧道消息限制可能更低，尤其 base64 会增加传输大小；客户端拒绝大截图时，使用较小桌面。没有视频流、图片缩放、剪贴板同步、声音、浏览器界面或跨调用按键保持；截图不包含本地查看器绘制的光标。
 
 VNC 未启用时检查当前配置并重启 MCP。SSH 转发失败时检查 SSH 的 `AllowTcpForwarding`、目标地址和 VNC 监听服务。认证不支持时，使用受保护回环地址上的 None 或 SSH 内的 VncAuth。鼠标坐标越界时重新截图；桌面尺寸可能在两次调用间改变。认证和帧错误返回 MCP `isError: true`，不返回成功图片数据。
-
-本地验收使用真实 x11vnc、OpenSSH、xterm 和 MCP stdio 客户端，验证截图解码、真实鼠标位置、键盘效果、认证、清理和无公开端口。这本身不证明真实 ChatGPT 应用已经发现或显示新工具；还需升级目标部署后实际经隧道调用。
 
 协议参考：[RFB 规范](https://github.com/rfbproto/rfbproto/blob/master/rfbproto.rst)、[x11vnc 服务端](https://github.com/LibVNC/x11vnc)、[官方隧道配置](https://github.com/openai/tunnel-client/blob/v0.0.19/docs/configuration.md)。

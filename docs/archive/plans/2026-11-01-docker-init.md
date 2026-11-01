@@ -3,6 +3,8 @@
 
 English | [简体中文](2026-11-01-docker-init.zh-CN.md)
 
+> Historical record: this document describes the implementation and checks for the version or phase named below. For current setup and usage, see the [documentation](../../README.md).
+
 Historical plan. Acceptance statements describe that stage; see the [deployment record](../live-deployment.md) for subsequent live status.
 
 Goal: implement independent container initialization in Go while retaining native service installation. The container exposes MCP only through OpenAI Tunnel.

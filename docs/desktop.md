@@ -1,9 +1,9 @@
 <!-- Created by Yanjunhui -->
-# Native desktop and independent VNC
+# Native Linux desktop
 
-English | [简体中文](desktop.zh-CN.md) | [README](../README.md)
+English | [简体中文](desktop.zh-CN.md) | [Documentation](README.md)
 
-From 0.3.0, ChatGPT_Tunnel_Console provides screenshots and keyboard/mouse control through its own `desktop-*` MCP tools without a VNC service. Users start this project and operate through ChatGPT/Codex; a separate viewer is unnecessary. Optional `vnc-*` tools provide a second, independently configured path. Neither path automatically falls back to the other.
+Use the `desktop-*` tools to capture a Linux X11 desktop and control its mouse and keyboard from ChatGPT or Codex. The native backend works through SSH without a VNC server or separate viewer. Optional `vnc-*` tools connect to the same desktop or another compatible VNC server.
 
 | Capability | Native desktop | Optional VNC |
 |---|---|---|
@@ -36,7 +36,7 @@ display = ":1"
 timeout = "15s"
 ```
 
-Use `compose.init.yaml` with `--non-interactive --config /input/config.toml`, then start with the desktop overlay. Existing profiles do not implicitly enable either backend. For external Linux targets, install the utilities and ensure the SSH account already has access to the selected X display and its authentication environment. Do not broadly disable display access control to make a probe pass.
+Use `compose.init.yaml` with `--non-interactive --config /input/config.toml`, then start with the desktop overlay. Existing profiles do not implicitly enable either backend. For external Linux targets, install the utilities and ensure the SSH account already has access to the selected X display and its authentication environment. Keep display access control enabled and grant access only to the intended account.
 
 ## Add or stop complementary VNC
 
@@ -80,6 +80,6 @@ desktop-screenshot  {"profile":"local-dev"}
 
 Both paths enforce 1–256 pointer events, 1–16 keys, 1–4096 Unicode characters, an 8192-pixel side limit, 8,388,608 total pixels, a 16 MiB PNG limit and a default 15-second operation deadline (maximum 120 seconds). Key names, button bits and error behavior are in the [tool reference](tool-reference.md). Native capture requires 24-bit TrueColor or identity-mapped DirectColor with 24/32-bit storage. Invalid/truncated frames return errors without a partial image. Unicode rendering still depends on the target application and input method.
 
-If ChatGPT reports missing tools after an upgrade, refresh the existing app's tools in its management page and re-check discovery. Local tests and tunnel health alone do not prove ChatGPT has discovered the new schema. Do not create another tunnel supervisor with the same ID for this check.
+If tools are missing after an upgrade, follow [tool discovery troubleshooting](troubleshooting.md#tools-or-parameters-still-look-outdated).
 
 Native input keeps a 12 ms delay for ASCII and uses 100 ms when a call contains non-ASCII text or keys, allowing more time to consume temporary Unicode mappings. This improves delivery under short application delays, but cannot guarantee input to an unresponsive application. Verify results; do not blindly retry. Split non-ASCII text into short chunks (about 100 characters with the default timeout), or increase `desktop.timeout` up to 120 seconds. The 4096-character validation limit is not a promise that a single call finishes before its deadline.

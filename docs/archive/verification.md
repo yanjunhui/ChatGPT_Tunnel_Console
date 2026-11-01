@@ -3,6 +3,8 @@
 
 English | [简体中文](verification.zh-CN.md)
 
+> Historical record: this document describes the implementation and checks for the version or phase named below. For current setup and usage, see the [documentation](../README.md).
+
 Date: 2026-11-01 (Asia/Shanghai). Formal runtime status is recorded in live-deployment.md. Early snapshots below describe 0.1.0; later sections record native initialization, Docker initialization, download compatibility and the formal upgrade.
 
 Historical limitations apply to their own stage. Subsequent real-tunnel progress is recorded in [live deployment](live-deployment.md).

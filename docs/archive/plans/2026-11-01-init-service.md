@@ -3,6 +3,8 @@
 
 English | [简体中文](2026-11-01-init-service.zh-CN.md)
 
+> Historical record: this document describes the implementation and checks for the version or phase named below. For current setup and usage, see the [documentation](../../README.md).
+
 Historical plan. Acceptance statements describe that stage; see the [deployment record](../live-deployment.md) for subsequent live status.
 
 Goal: add `init` to the native Go CLI, prompt for tunnel/SSH settings on first use, and install/start a macOS launchd or Linux systemd service. The native Go service approach was approved by the user.

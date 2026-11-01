@@ -26,6 +26,8 @@ Docker tests use private temporary workspaces. A short-lived root container assi
 
 Run `make vuln` for known reachable Go vulnerabilities and `make secrets` to scan Git history with redacted output. These tools are version-pinned in the Makefile and require network access for installation/database queries. They do not replace manual review. Run `make tidy` after dependency changes and include both module files. CI runs macOS/Linux race tests, builds, documentation checks, secret/dependency scans and Linux Docker integration; it never uses real tunnel credentials.
 
+Desktop acceptance verifies MCP image output, actual pointer position, keyboard input executed by xterm, password authentication and rejection, credential persistence, and no published ports. Optional `TUNNEL_CONSOLE_CAPTURE_PATH` saves the returned PNG to an existing private directory for visual inspection; do not commit it. Protocol tests cover malformed frames, full-frame coverage, resize, input limits, cancellation and release events.
+
 ## Change process
 
 1. Reproduce defects before editing and add a regression test for meaningful behavior changes.
@@ -37,8 +39,12 @@ Run `make vuln` for known reachable Go vulnerabilities and `make secrets` to sca
 
 Report ordinary defects through the issue form. For credential exposure or exploitable vulnerabilities, use the private channel in [SECURITY.md](SECURITY.md). Do not attach live configuration, private keys, account identifiers, tunnel IDs or private chat links. Use synthetic fixtures and preserve meaningful errors after redaction.
 
+## Documentation maintenance
+
+Public guides explain current capabilities, setup and usage. Keep the project home focused on purpose, quick start and guide links. Put parameter details in the configuration or tool reference and release changes in the changelog. Keep implementation plans and revision-specific verification/deployment records in the [project archive](docs/archive/README.md), retaining dates and version scope.
+
+English documents use the original filenames; complete Chinese companions use `.zh-CN.md`, with reciprocal language links. Update behavior, fields, commands and examples together. Code blocks, defaults, versions and hashes must agree. Keep contributor conventions here, separate from user workflows. Runtime message language is defined by the program and maintained separately from documentation translations. Run `make check` to validate links, bilingual examples and formatting.
+
 ## Licensing
 
 Contributions are accepted under the repository's [MIT license](LICENSE). Submit only code and documentation you have permission to contribute. Third-party components keep their own licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
-
-Desktop acceptance verifies MCP image output, actual pointer position, keyboard input executed by xterm, password authentication and rejection, credential persistence, and no published ports. Optional `TUNNEL_CONSOLE_CAPTURE_PATH` saves the returned PNG to an existing private directory for visual inspection; do not commit it. Protocol tests cover malformed frames, full-frame coverage, resize, input limits, cancellation and release events.

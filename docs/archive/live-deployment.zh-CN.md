@@ -3,9 +3,11 @@
 
 [English](live-deployment.md) | 简体中文
 
+> 历史记录：本文描述标题所列版本或阶段的实现与验证情况。当前安装与使用方法请参阅[文档中心](../README.zh-CN.md)。
+
 日期：2026-11-01（Asia/Shanghai）。项目：`ChatGPT_Tunnel_Console`。
 
-## 当前部署：0.3.2
+## 记录的部署：0.3.2
 
 正式 MCP 于 2026-11-01 20:16:44 升级至 **0.3.2**。自带原生 X11 桌面及独立管理的 VNC 服务沿用已验证的 0.3.0 镜像；0.3.1 截图与 0.3.2 Unicode 修复仅替换 MCP。原隧道凭据、SSH 身份、工作区及开发主目录均保留，没有宿主机端口映射。
 
@@ -27,9 +29,9 @@
 
 截图 A/B 对照及最初 Unicode 失败保留于[验证记录](verification.zh-CN.md)。这些是真实失败并触发修复，未计为验收成功；输入送达确认不作为应用处理成功证据。结果覆盖自带 Linux X11 桌面，不包含原生 macOS/Windows/Wayland 桌面、宿主机重启或断网恢复。
 
-### 当前操作与回退
+### 该版本的操作与回退
 
-本地 `.env` 选择三个 Compose 文件及明确镜像标签。使用 `docker compose stop vnc` / `docker compose start vnc` 仅管理可选服务，`desktop-*` 独立于它。两条后端仍依赖 SSH，并共享 dev 提供的 X 显示服务；仅原生配置及外部 VNC 目标见[桌面指南](desktop.zh-CN.md)。
+本地 `.env` 选择三个 Compose 文件及明确镜像标签。使用 `docker compose stop vnc` / `docker compose start vnc` 仅管理可选服务，`desktop-*` 独立于它。两条后端仍依赖 SSH，并共享 dev 提供的 X 显示服务；仅原生配置及外部 VNC 目标见[桌面指南](../desktop.zh-CN.md)。
 
 私有备份及证据位于 `.cache/upgrade-0.3.0/`，包括升级前 data／工作区归档、开发主目录／SSH 身份卷归档、原环境文件、容器快照、部署日志、健康结果及 ChatGPT 证据。0.2.0/0.3.0/0.3.1 镜像继续保留。仅回退 MCP 时，应先停止 MCP，在 `.env` 恢复所选镜像标签，再以 `--no-deps --no-build --pull never` 仅重建 MCP；此过程会结束内存会话。旧版也会恢复其已记录的截图／Unicode 限制。完整回退至 0.2.0 还需对应配置代次及双文件 Compose 设置。本次成功升级后没有执行回退演练。
 

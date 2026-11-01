@@ -1,9 +1,9 @@
 <!-- Created by Yanjunhui -->
 # 配置与命令行参考
 
-[English](configuration.md) | 简体中文 | [README](../README.zh-CN.md)
+[English](configuration.md) | 简体中文 | [文档中心](README.zh-CN.md)
 
-本文描述仓库 0.3.3 的实际实现，对应代码为 `internal/config`、`internal/setup`、`internal/tunnel` 和 `cmd/tunnel-console-mcp`。示例只使用占位值，不包含真实凭据。
+通过 TOML 配置 SSH 连接、凭据和隧道。本文适用于 0.3.3；需要引导式设置时，从[安装指南](installation.zh-CN.md)开始。下文示例使用占位值。
 
 ## TOML 配置
 
@@ -130,4 +130,4 @@ docker compose exec -T mcp tunnel-console-mcp version
 docker compose exec -T mcp tunnel-client health --port 8080 --require-control-plane-poll --json
 ```
 
-端口须与配置匹配。ready 状态可能早于首次控制面成功轮询，因此应要求轮询检查并查看启动日志。在运行容器内直接执行 `doctor` 可能与已占用的诊断端口冲突；部署记录使用独立一次性诊断容器。最后仍需在 ChatGPT 中实际调用 MCP 工具；报告中分别记录本地 stdio、隧道健康和端到端结果。
+端口须与配置匹配。ready 状态可能早于首次控制面成功轮询，因此应要求轮询检查并查看启动日志。运行中的容器使用上面的 health 命令，`doctor` 可能与其已占用的诊断端口冲突。健康检查后，通过插件执行一条命令，确认 SSH 连通。

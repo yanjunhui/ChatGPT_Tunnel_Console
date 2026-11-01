@@ -50,7 +50,7 @@ MCP 工具契约与 0.1.1 兼容。本次源码发布不会自动升级已有部
 ## 0.1.1 — 2026-11-01
 
 - 为内联 SFTP 下载增加 `outputSchema` 和类型化 `structuredContent`，保留原有文本 JSON 响应，明确返回空文件字段。
-- 通过真实隧道、SSH 和 SFTP 调用验收正式容器升级，详见[验证记录](docs/verification.zh-CN.md)。
+- 通过真实隧道、SSH 和 SFTP 调用验收正式容器升级，详见[验证记录](docs/archive/verification.zh-CN.md)。
 - 完成英文主文档及完整简体中文配套，并补充双语源码注释。
 
 ## 0.1.0 — 2026-11-01
