@@ -1,0 +1,73 @@
+# Created by Yanjunhui
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Formatting, documentation, race tests and builds
+        run: make check test vet build linux
+      - name: Module consistency
+        run: |
+          make tidy
+          git diff --exit-code -- go.mod go.sum
+
+  security:
+    name: Dependency and secret checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: false
+      - run: make vuln secrets
+
+  docker:
+    name: Docker OpenSSH integration
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      TUNNEL_SSH_MCP_IMAGE: go-tunnel-ssh-mcp:ci
+      TUNNEL_SSH_DEV_IMAGE: go-tunnel-ssh-dev:ci
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: false
+      # Isolated fixtures use stdio; this job never starts an OpenAI tunnel.
+      # 隔离夹具使用 stdio，此任务不启动 OpenAI 隧道。
+      - run: make docker-build docker-test

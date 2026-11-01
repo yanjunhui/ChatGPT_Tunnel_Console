@@ -1,0 +1,12 @@
+# Created by Yanjunhui
+# Internal development target: public-key login and the built-in SFTP subsystem.
+# 内部开发目标：使用公钥登录及内置 SFTP 子系统。
+Port 22
+HostKey /var/lib/tunnel-ssh/host_key
+AuthorizedKeysFile .ssh/authorized_keys
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+UsePAM no
+PrintMotd no
+Subsystem sftp internal-sftp
+PidFile /run/sshd/sshd.pid

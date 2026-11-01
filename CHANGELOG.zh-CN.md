@@ -1,0 +1,26 @@
+<!-- Created by Yanjunhui -->
+# 更新记录
+
+[English](CHANGELOG.md) | 简体中文
+
+## 0.1.2 — 2026-11-01
+
+- 修复 run、serve、check、doctor、install-tunnel 的 `--help` 错误退出；增加覆盖这些命令及 init 的回归测试。
+- 根据漏洞审查，将最低 Go 工具链及 Docker 构建基线提升至 1.26.10。
+- 将 Go 模块路径统一为 `github.com/yanjunhui/ChatGPT_Tunnel_SSH`。
+- 支持通过 Compose 镜像标签区分验收构建和正式部署。
+- 完善公开源码发布：MIT 许可、中英贡献／安全／第三方文档、CI、依赖更新、文档检查和敏感信息扫描；公开部署记录已去除私人标识。
+
+MCP 工具契约与 0.1.1 兼容。本次源码发布不会自动升级已有部署；记录中的正式部署仍为 0.1.1。
+
+## 0.1.1 — 2026-11-01
+
+- 为内联 SFTP 下载增加 `outputSchema` 和类型化 `structuredContent`，保留原有文本 JSON 响应，明确返回空文件字段。
+- 通过真实隧道、SSH 和 SFTP 调用验收正式容器升级，详见[验证记录](docs/verification.zh-CN.md)。
+- 完成英文主文档及完整简体中文配套，并补充双语源码注释。
+
+## 0.1.0 — 2026-11-01
+
+- 实现独立 Go MCP 服务，提供 13 项 SSH、PTY／会话及 SFTP 工具。
+- 接入官方 OpenAI 出站隧道，提供原生系统服务安装和 Docker 一次性初始化。
+- 增加本地协议测试及隔离 Docker OpenSSH 验收测试。

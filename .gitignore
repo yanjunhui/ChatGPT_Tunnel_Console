@@ -1,0 +1,23 @@
+# Created by Yanjunhui
+.cache/
+bin/
+config.toml
+.env
+.env.*
+!.env.example
+secrets/
+workspace/
+data/
+init-input/
+*.test
+coverage.out
+.DS_Store
+# Local credentials and temporary editor files must never enter public history.
+# 本地凭据和编辑器临时文件不得进入公开历史。
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+*.swp
+*.swo
+*.log

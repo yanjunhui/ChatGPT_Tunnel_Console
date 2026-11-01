@@ -1,0 +1,48 @@
+# Created by Yanjunhui
+name: go-tunnel-ssh
+services:
+  dev:
+    image: ${TUNNEL_SSH_DEV_IMAGE:-go-tunnel-ssh-dev:latest}
+    build:
+      context: .
+      target: dev
+    restart: unless-stopped
+    hostname: go-ssh-dev
+    volumes:
+      - ${TUNNEL_SSH_WORKSPACE_DIR:-./workspace}:/workspace
+      - developer_home:/home/developer
+      - ssh_identity:/var/lib/tunnel-ssh
+    healthcheck:
+      test: ["CMD-SHELL", "ssh -i /var/lib/tunnel-ssh/client_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o BatchMode=yes developer@127.0.0.1 true"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+  mcp:
+    image: ${TUNNEL_SSH_MCP_IMAGE:-go-tunnel-ssh-mcp:latest}
+    build:
+      context: .
+      target: runtime
+      args:
+        TUNNEL_CLIENT_VERSION: v0.0.19
+    restart: unless-stopped
+    depends_on:
+      dev:
+        condition: service_healthy
+    volumes:
+      - type: bind
+        source: ${TUNNEL_SSH_CONFIG_DIR:-./data}
+        target: /etc/tunnel-ssh
+        read_only: true
+        bind:
+          # Require init to create the configuration before runtime starts.
+          # 正式启动前必须先通过 init 创建配置目录。
+          create_host_path: false
+      - ${TUNNEL_SSH_WORKSPACE_DIR:-./workspace}:/workspace
+      - ssh_identity:/var/lib/tunnel-ssh:ro
+    stop_grace_period: 20s
+    # SSH and MCP have no published host ports; tunnel traffic is outbound.
+    # SSH 和 MCP 均无宿主机端口映射，隧道通过出站连接工作。
+volumes:
+  developer_home:
+  ssh_identity:

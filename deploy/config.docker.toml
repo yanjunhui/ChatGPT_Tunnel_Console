@@ -1,0 +1,19 @@
+# Created by Yanjunhui
+# Legacy stdio regression fixture for compose.test.yaml; production uses init.
+# 仅用于 compose.test.yaml 的早期 stdio 回归夹具；正式部署使用 init。
+default_profile = "local-dev"
+output_bytes = 1048576
+
+[tunnel]
+binary = "/usr/local/bin/tunnel-client"
+api_key = "file:/run/secrets/openai_tunnel_key"
+health_addr = "127.0.0.1:8080"
+
+[profiles.local-dev]
+host = "dev"
+port = 22
+user = "developer"
+private_key = "/var/lib/tunnel-ssh/client_key"
+workdir = "/workspace"
+connect_timeout = "15s"
+command_timeout = "60s"

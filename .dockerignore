@@ -1,0 +1,10 @@
+# Created by Yanjunhui
+*
+!go.mod
+!go.sum
+!cmd/**
+!internal/**
+!deploy/**
+!Dockerfile
+!.dockerignore
+**/.DS_Store

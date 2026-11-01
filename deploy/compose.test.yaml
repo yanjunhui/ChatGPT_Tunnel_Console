@@ -1,0 +1,27 @@
+# Created by Yanjunhui
+# Isolated local acceptance environment; never starts an OpenAI tunnel.
+# 隔离的本地验收环境，不启动 OpenAI 隧道。
+name: go-tunnel-ssh-test
+services:
+  dev:
+    image: ${TUNNEL_SSH_DEV_IMAGE:-go-tunnel-ssh-dev:latest}
+    hostname: go-ssh-test
+    volumes:
+      - ../.cache/docker-workspace:/workspace
+      - test_home:/home/developer
+      - test_identity:/var/lib/tunnel-ssh
+    healthcheck:
+      test: ["CMD-SHELL", "ssh -i /var/lib/tunnel-ssh/client_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o BatchMode=yes developer@127.0.0.1 true"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
+  mcp:
+    image: ${TUNNEL_SSH_MCP_IMAGE:-go-tunnel-ssh-mcp:latest}
+    command: ["serve", "--config", "/etc/tunnel-ssh/config.toml"]
+    volumes:
+      - ./config.docker.toml:/etc/tunnel-ssh/config.toml:ro
+      - ../.cache/docker-workspace:/workspace
+      - test_identity:/var/lib/tunnel-ssh:ro
+volumes:
+  test_home:
+  test_identity:

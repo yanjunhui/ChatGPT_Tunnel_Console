@@ -1,0 +1,31 @@
+# Created by Yanjunhui
+name: Bug report / 问题反馈
+description: Report a reproducible defect without credentials or private logs.
+body:
+  - type: markdown
+    attributes:
+      value: Do not include keys, passwords, private chat URLs or unredacted configs. 请勿提交密钥、密码、私人聊天链接或未脱敏配置。
+  - type: input
+    id: version
+    attributes:
+      label: Version and environment / 版本与环境
+      description: Include application version, OS, architecture and native or Docker deployment.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Minimal reproduction / 最小复现步骤
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and actual behavior / 预期与实际行为
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Redacted evidence / 脱敏证据
+      description: Preserve exit codes and errors while removing credentials and private identifiers.

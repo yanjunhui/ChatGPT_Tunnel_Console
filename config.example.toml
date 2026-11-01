@@ -1,0 +1,35 @@
+# Created by Yanjunhui
+# Native/manual configuration. See docs/configuration.md and its Chinese companion.
+# 原生或手工运行配置；完整字段说明见 docs/configuration.md 及对应中文版。
+default_profile = "server"
+# Per-output retained bytes and maximum raw bytes for inline downloads; 0 uses 1 MiB.
+# 每份输出的缓存上限及内联下载原始字节上限；0 使用 1 MiB 默认值。
+output_bytes = 1048576
+
+[tunnel]
+binary = "./bin/tunnel-client"
+# Leave id empty to use CONTROL_PLANE_TUNNEL_ID.
+# id 为空时读取 CONTROL_PLANE_TUNNEL_ID。
+id = ""
+# References only: env:NAME or file:PATH. Do not paste a key into this template.
+# 只填写 env:NAME 或 file:PATH 引用，不要直接写入密钥。
+api_key = "env:CONTROL_PLANE_API_KEY"
+# Loopback diagnostics only; port 0 lets the OS choose an available port.
+# 诊断接口仅绑定回环地址；端口 0 由系统分配可用端口。
+health_addr = "127.0.0.1:0"
+
+[profiles.server]
+host = "127.0.0.1"
+port = 22
+user = "your-user"
+private_key = "/absolute/path/to/id_ed25519"
+# Optional authentication references. Native/container init does not support SSH agents.
+# 可选认证引用；原生或容器 init 不支持依赖 SSH agent。
+# passphrase = "env:SSH_KEY_PASSPHRASE"
+# password = "env:SSH_PASSWORD"
+# agent_socket = "env:SSH_AUTH_SOCK"
+workdir = "/workspace"
+connect_timeout = "15s"
+# 0s disables the command deadline; background sessions do not use this timeout.
+# 0s 禁用命令期限；后台会话不使用此超时。
+command_timeout = "60s"
