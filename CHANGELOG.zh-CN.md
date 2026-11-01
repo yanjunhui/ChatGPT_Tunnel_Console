@@ -3,6 +3,14 @@
 
 [English](CHANGELOG.md) | 简体中文
 
+## 0.3.0 — 2026-11-01
+
+- 新增四项经 SSH/X11 的原生 `desktop-*` MCP 工具，独立于 VNC；工具发现共 21 项。
+- 将自带 Xvfb 桌面与可选 x11vnc 服务分离，两组工具可单独启用，关闭 VNC 后仍能原生截图及输入。
+- 新增独立桌面配置、初始化时可选 VNC 问题、有界 XWD 解码，以及非登录 SSH 环境的 UTF-8 输入处理。
+- 新增真实容器独立性、中文输入和认证验证，并提供双语操作及升级文档。
+- 明确命令工具描述，不改变目标权限；客户端审批规则仍然适用。
+
 ## 0.2.0 — 2026-11-01
 
 - 项目／仓库更名为 ChatGPT_Tunnel_Console，Go 模块改为 `github.com/yanjunhui/ChatGPT_Tunnel_Console`，主命令改为 `tunnel-console-mcp`。

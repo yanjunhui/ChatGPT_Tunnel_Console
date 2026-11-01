@@ -3,7 +3,7 @@
 
 English | [简体中文](verification.zh-CN.md)
 
-Date: 2026-11-01 (Asia/Shanghai). Formal service version: 0.1.1. Early snapshots below describe 0.1.0; later sections record native initialization, Docker initialization, download compatibility and the formal upgrade.
+Date: 2026-11-01 (Asia/Shanghai). Formal runtime status is recorded in live-deployment.md. Early snapshots below describe 0.1.0; later sections record native initialization, Docker initialization, download compatibility and the formal upgrade.
 
 Historical limitations apply to their own stage. Subsequent real-tunnel progress is recorded in [live deployment](live-deployment.md).
 
@@ -201,3 +201,24 @@ Date: 2026-11-01 (Asia/Shanghai). This is a source release, with separate candid
 A window-title lookup initially failed because the terminal shell rewrites its title; acceptance now locates the visible XTerm class. A later Docker Desktop configuration-permission assertion failed once without a diagnostic. The test now prints safe ownership/mode information on failure; its subsequent full run passed. No permission relaxation or retry workaround was added, and the single transient failure's cause is unconfirmed.
 
 Evidence is private under `.cache/console-vnc/`, including the returned desktop PNG and test/build/scan logs. The public repository is now `ChatGPT_Tunnel_Console`; deployment identifiers are retained for upgrade compatibility. GitHub Actions checks Linux/macOS and Docker independently for each commit. No real ChatGPT VNC call, formal 0.2.0 upgrade, external desktop installation, reboot recovery or network-failure reconnection was performed in this stage. Earlier 0.1.1 live tunnel acceptance remains separate.
+
+## 0.3.0 independent desktop acceptance
+
+Date: 2026-11-01 (Asia/Shanghai). The native backend uses X11 over SSH; the optional VNC backend remains independently configured. No new Go dependency was introduced.
+
+| Check | Observed result |
+|---|---|
+| Local regression | Full race suite, vet, macOS arm64 build and Linux arm64/amd64 cross-builds passed. |
+| Codec and configuration | XWD 24/32-bit storage, both byte orders, padded rows, original pixel values, invalid headers/dimensions/color tables and all truncation points passed; native display/timeout validation and import copying passed. |
+| Lifecycle | Real SSH cancellation, manager shutdown and queued-operation deadlines release connections and the desktop gate. |
+| Actual desktop independence | With no VNC program installed in dev and no VNC service started, native screenshot, pointer, chord, Chinese typing and Enter passed. Both paths then passed together; after stopping VNC, VNC calls failed and native operations still passed. |
+| Observable input effects | Pointer position read back as (100,100). Separate xterm commands produced four exact markers with Chinese text; files were read back through SSH. Original 1280×800 MCP PNGs were decoded and visually inspected. |
+| VNC-only configuration | A separate profile without native settings used password-authenticated x11vnc successfully; incorrect passwords were rejected without disclosure. |
+| Docker regression | Initialization, permissions, real OpenSSH/SFTP/PTY and toolchain checks passed on arm64; temporary test containers and volumes were removed. |
+| Fuzzing | Ten-second XWD fuzz run: 6,762,395 executions, no crash; bounded evidence, not exhaustive proof. |
+| Documentation and source | 32 Markdown files / 16 bilingual pairs passed; 72 Go files passed public/bilingual comments and function-size checks. |
+| Security | No reachable or imported-package Go vulnerabilities; the existing module-only OpenPGP advisory remains. History and publication-source scans use redacted output. |
+
+Reproduced and fixed during acceptance: an ASCII SSH locale rejected Unicode; 1 ms xdotool input could lose temporary Unicode mappings (12 ms restored readback); `mousemove --sync` stalled at unchanged coordinates (exit 124 under a one-second reproduction); cross-container MIT-SHM access failed, so the separate VNC service uses socket capture with `-noshm`. IPv6 listeners are disabled in that sidecar.
+
+Evidence is private under `.cache/independent-desktop/`. These local checks do not substitute for the real ChatGPT calls recorded separately in [live deployment](live-deployment.md). Host reboot recovery, network-failure recovery and external native desktop installation were not tested in this stage.

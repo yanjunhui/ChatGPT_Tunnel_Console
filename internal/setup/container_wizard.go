@@ -25,7 +25,17 @@ func containerWizard(c *Console) (draft, error) {
 		d.config.DefaultProfile = "local-dev"
 		p := config.Profile{Host: "dev", Port: 22, User: "developer", PrivateKey: containerIdentity, Workdir: "/workspace"}
 		if target == "3" {
-			p.VNC = &config.VNC{Enabled: true, Port: 5901}
+			p.Desktop = &config.Desktop{Enabled: true, Display: ":1"}
+			optional, err := c.Ask("同时启用独立 VNC 补充服务？y/n", "n")
+			if err != nil {
+				return d, err
+			}
+			if optional != "y" && optional != "n" {
+				return d, fmt.Errorf("VNC 选项必须为 y 或 n")
+			}
+			if optional == "y" {
+				p.VNC = &config.VNC{Enabled: true, Port: 5901}
+			}
 		}
 		d.config.Profiles["local-dev"] = p
 	case "2":
@@ -51,11 +61,20 @@ func prepareContainerProfile(d draft, p config.Profile, name, directory string, 
 }
 
 func containerStartHint(c *Console, cfg *config.Config) {
-	command := "docker compose up -d --build"
+	desktop, vnc := false, false
 	for _, p := range cfg.Profiles {
-		if p.Host == "dev" && p.VNC != nil && p.VNC.Enabled && p.VNC.Port == 5901 {
-			command = "docker compose -f compose.yaml -f compose.desktop.yaml up -d --build"
+		if p.Host == "dev" {
+			desktop = desktop || (p.Desktop != nil && p.Desktop.Enabled)
+			vnc = vnc || (p.VNC != nil && p.VNC.Enabled && p.VNC.Port == 5901)
 		}
 	}
+	command := "docker compose -f compose.yaml"
+	if desktop || vnc {
+		command += " -f compose.desktop.yaml"
+	}
+	if vnc {
+		command += " -f compose.vnc.yaml"
+	}
+	command += " up -d --build"
 	fmt.Fprintf(c.Output, "请在宿主机执行 %s；已有容器需重启以加载新配置。初始化未启动隧道或验证远端连通性。\n", command)
 }

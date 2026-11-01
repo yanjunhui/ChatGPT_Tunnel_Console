@@ -3,7 +3,7 @@
 
 English | [简体中文](README.zh-CN.md)
 
-An independent Go console for SSH, SFTP and VNC desktops, exposed as an MCP server through the official OpenAI tunnel. The tunnel authenticates MCP callers. The server adds no second Bearer token, OAuth layer, roles, approval system, command classification, allow/deny lists, path sandbox or daily quota.
+An independent Go console for SSH, SFTP, native X11 desktops and optional VNC access, exposed as an MCP server through the official OpenAI tunnel. The tunnel authenticates MCP callers. The server adds no second Bearer token, OAuth layer, roles, approval system, command classification, allow/deny lists, path sandbox or daily quota.
 
 The feature scope draws on `ssh-mcp-main 2` and the deployment approach on `SSH-MCP-main`. This project neither copies nor wraps their TypeScript/Python implementations and does not depend on npm ssh-mcp. MCP, SSH, sessions, SFTP, VNC, configuration and startup are implemented in Go; the tunnel uses the official tunnel-client.
 
@@ -15,20 +15,20 @@ OpenAI Tunnel <-- outbound connection <-- official tunnel-client
                                                  | stdio
                                                  v
                                             Go Console MCP
-                                                 | SSH / SFTP / forwarded VNC
+                                                 | SSH / SFTP / native X11 / forwarded VNC
                                                  v
                                   Docker development environment / SSH host
 ```
 
 There is no MCP HTTP listener. `serve` is a local stdio worker launched by tunnel-client and also used by tests; it does not authenticate callers itself. Do not separately expose it through HTTP, TCP or socat. The official tunnel diagnostics bind only to loopback.
 
-Current source version: **0.2.0**. This independent project is licensed under [MIT](LICENSE). See the [security policy](SECURITY.md) before deployment: authorized callers have the SSH account’s full permissions, and SSH target host keys are not verified.
+Current source version: **0.3.0**. This independent project is licensed under [MIT](LICENSE). See the [security policy](SECURITY.md) before deployment: authorized callers have the SSH account’s full permissions, and SSH target host keys are not verified.
 
 ## Documentation
 
 - [Configuration and CLI reference](docs/configuration.md): defaults, credential references, initialization and validation boundaries.
 - [VNC desktop guide](docs/vnc.md): setup, screenshots, mouse/keyboard operations and limits.
-- [MCP tool reference](docs/tool-reference.md): parameters, results and errors for all 17 tools.
+- [MCP tool reference](docs/tool-reference.md): parameters, results and errors for all 21 tools.
 - [Verification record](docs/verification.md) and [live deployment record](docs/live-deployment.md): historical tests and actual tunnel acceptance evidence.
 
 - [Contributing](CONTRIBUTING.md), [security policy](SECURITY.md), [changelog](CHANGELOG.md) and [third-party notices](THIRD_PARTY_NOTICES.md).
@@ -50,6 +50,10 @@ Current source version: **0.2.0**. This independent project is licensed under [M
 | `sftp-upload` | Write UTF-8 or base64 content, overwriting the remote file |
 | `sftp-download-file` | Stream to the MCP server filesystem, replacing the local destination on success |
 | `sftp-upload-file` | Stream from the MCP server filesystem, overwriting the remote destination |
+| `desktop-screenshot` | Capture the native X11 desktop as PNG without VNC |
+| `desktop-pointer` | Move, click, drag or scroll directly through X11 |
+| `desktop-key` | Press and release a chord directly through X11 |
+| `desktop-type` | Type Unicode directly without clipboard access |
 | `vnc-screenshot` | Return a native PNG as MCP image content plus desktop metadata |
 | `vnc-pointer` | Move, click, drag or scroll using screenshot pixel coordinates |
 | `vnc-key` | Press and release one key or keyboard chord |
@@ -59,15 +63,15 @@ Since 0.1.1, `sftp-download` publishes an `outputSchema` and returns both MCP `s
 
 The old `read-command`, `privileged-command` and `reload-config` interfaces are not retained. All independent commands use `run-command`; sudo follows the target account's actual permissions. Restart to load configuration changes. Arbitrary shell tools are not labeled read-only.
 
-## Optional VNC desktop
+## Independent native desktop and optional VNC
 
-Choose **3: bundled graphical desktop** in the Docker initializer, then use:
+Choose **3: bundled graphical desktop** in the Docker initializer. Leave the optional VNC question at **n** for native desktop only, then use:
 
 ```sh
 docker compose -f compose.yaml -f compose.desktop.yaml up -d --build
 ```
 
-This adds a 1280×800 TigerVNC/Openbox desktop with an xterm terminal. VNC listens on the development container’s loopback port 5901 and is reached through SSH; no VNC host port is published. Call `vnc-screenshot`, send input, then capture again to confirm the result. External desktops can be enabled per SSH profile. See the [complete VNC guide](docs/vnc.md).
+This adds a 1280×800 Xvfb/Openbox desktop and xterm terminal. The four `desktop-*` tools capture and control it directly through SSH, without a VNC server or client. To add complementary VNC access, answer **y** and include `-f compose.vnc.yaml`. That separately managed x11vnc service attaches to the same display on loopback port 5901; stopping it leaves native tools operational. No host ports are published. See the [native desktop guide](docs/desktop.md) and [VNC guide](docs/vnc.md).
 
 ### Name and upgrade compatibility
 
@@ -307,7 +311,7 @@ TUNNEL_SSH_DEV_IMAGE=go-tunnel-ssh-dev:review \
 make docker-build docker-test # Container init, real wizard, persistence/permissions, OpenSSH/PTY/SFTP
 ```
 
-Automated tests create temporary SSH hosts and files without using existing business hosts or live tunnels. On 2026-11-01, the formal MCP container was upgraded to 0.1.1. Real OpenAI tunnel calls, SSH commands and Chinese SFTP downloads passed; ChatGPT received content, encoding and byte count directly, with no empty download object in this run. See the [verification record](docs/verification.md) and [deployment record](docs/live-deployment.md) for exact scope, evidence and rollback.
+Automated tests create temporary SSH hosts and files without using existing business hosts or live tunnels. The 0.3.0 container checks verify native input/capture before VNC starts, both paths together, and native operation after VNC stops. See the [verification record](docs/verification.md) and [deployment record](docs/live-deployment.md) for revision-specific checks, formal runtime status, real ChatGPT evidence and rollback.
 
 Dependencies are locked in `go.mod` / `go.sum`. The official tunnel version is pinned to v0.0.19 and downloaded archives are checked against the published `SHA256SUMS.txt`. Caches and credentials are excluded from Git/Docker build context. Development tools come from official Go 1.26.10 and Node 24 images and Debian packages. APT packages and base-image tags are not pinned to full snapshots, so builds are not claimed to be byte-for-byte reproducible.
 

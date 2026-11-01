@@ -14,7 +14,7 @@ import (
 
 // Version identifies both the CLI release and the MCP server implementation.
 // 中文：Version 同时标识 CLI 版本和 MCP 服务实现版本。
-const Version = "0.2.0"
+const Version = "0.3.0"
 
 type profileInput struct {
 	Profile string `json:"profile,omitempty"`
@@ -44,16 +44,17 @@ type signalInput struct {
 // 外部调用方身份由 OpenAI 隧道验证。
 func New(manager *remote.Manager) *mcp.Server {
 	s := mcp.NewServer(&mcp.Implementation{Name: "chatgpt-tunnel-console", Version: Version}, &mcp.ServerOptions{
-		Instructions: "SSH access through OpenAI Tunnel. Discover profiles first. Commands and paths have no application policy restrictions. Use run-command for independent commands; use open-session and write-session-input/read-session-output for persistent terminals. Tool filesystem paths refer to the MCP server or SSH host, not the ChatGPT client. All callers of this tunnel share named sessions.",
+		Instructions: "SSH access through OpenAI Tunnel. Discover profiles first. Use run-command for independent commands; use open-session and write-session-input/read-session-output for persistent terminals. Tool filesystem paths refer to the MCP server or SSH host, not the ChatGPT client. All callers of this tunnel share named sessions and desktops. Native desktop-* tools and optional vnc-* tools are independent. Inspect screenshots before input and verify results afterward.",
 	})
 	bind(s, "list-connections", "List configured SSH profiles; does not probe connectivity or expose credentials.", true,
 		func(_ context.Context, _ struct{}) ([]remote.ConnectionInfo, error) {
 			return manager.Connections(), nil
 		})
-	bind(s, "run-command", "Execute any shell command or multiline script. Nonzero exits, timeouts and transport errors are reported. No command classification or approvals. Use sudo directly if the target account permits it.", false, manager.Run)
+	bind(s, "run-command", "Execute any shell command or multiline script. Nonzero exits, timeouts and transport errors are reported. Runs with the configured SSH account permissions.", false, manager.Run)
 	registerSessions(s, manager)
 	registerFiles(s, manager)
 	registerDesktop(s, manager)
+	registerNativeDesktop(s, manager)
 	bind(s, "signal-process", "Send INT, TERM or KILL to a positive process ID on a POSIX SSH host.", false,
 		func(ctx context.Context, in signalInput) (remote.CommandResult, error) {
 			return signal(ctx, manager, in)

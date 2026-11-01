@@ -3,7 +3,7 @@
 
 English | [简体中文](tool-reference.zh-CN.md) | [README](../README.md)
 
-Applies to 0.2.0. Tool registration is in `internal/server/server.go`; input/result types and operations are in `internal/remote`. JSON names below are the actual public contract. Configuration defaults are documented in [configuration.md](configuration.md).
+Applies to 0.3.0. Tool registration is in `internal/server/server.go`; input/result types and operations are in `internal/remote`. JSON names below are the actual public contract. Configuration defaults are documented in [configuration.md](configuration.md).
 
 ## Shared conventions
 
@@ -18,7 +18,7 @@ Applies to 0.2.0. Tool registration is in `internal/server/server.go`; input/res
 
 ### `list-connections`
 
-Input: `{}`. Returns an array sorted by name. Each entry contains `name`, `host`, `port`, `user`, `workdir`, `default`, `sessions`, `status`, and `vnc_enabled`. Session counts include retained exited sessions. Status is `configured; connect on use`: this call neither authenticates to SSH nor probes connectivity, and does not expose credentials.
+Input: `{}`. Returns an array sorted by name. Each entry contains `name`, `host`, `port`, `user`, `workdir`, `default`, `sessions`, `status`, and `vnc_enabled` and `desktop_enabled`. Session counts include retained exited sessions. Status is `configured; connect on use`: this call neither authenticates to SSH nor probes connectivity, and does not expose credentials.
 
 ### `run-command`
 
@@ -132,6 +132,10 @@ Input: required remote `path` and MCP-server `local_path`, optional `profile`. S
 ### `sftp-upload-file`
 
 Input: required remote destination `path` and MCP-server source `local_path`, optional `profile`. The local source must be a regular file. Streams without an inline-size limit and overwrites the remote target. Returns `bytes` and the remote destination `path`. The remote write is not atomic and may be partial on failure, just like inline upload.
+
+## Native desktop tools
+
+`desktop-screenshot`, `desktop-pointer`, `desktop-key` and `desktop-type` use the same arguments, result shapes and input bounds as their VNC counterparts below. They require `desktop.enabled = true` and neither read VNC settings nor connect to VNC. Each operation runs target-side `xwd` or `xdotool` over SSH. Capture accepts only 24-bit TrueColor XWD with 24/32-bit storage and returns an unscaled PNG. Native support is Linux X11, not native Wayland/macOS/Windows desktops; external targets need display access, the utilities and C.UTF-8. Errors remain tool errors, possibly after partial input; no automatic VNC fallback or retries. Both paths share an operation queue within one MCP process to prevent interleaved gestures and bound image memory, while configuration, target, timeout and service lifecycle remain independent. See the [native desktop guide](desktop.md).
 
 ## VNC desktop tools
 

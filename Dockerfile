@@ -58,9 +58,21 @@ ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/dev-entrypoint"]
 
 FROM dev AS desktop
 RUN apt-get -o Acquire::Retries=3 update && apt-get -o Acquire::Retries=3 install -y --no-install-recommends \
-    tigervnc-standalone-server tigervnc-tools openbox xterm x11-utils xdotool fonts-dejavu-core fonts-noto-cjk \
+    xvfb x11-apps openbox xterm x11-utils xdotool fonts-dejavu-core fonts-noto-cjk \
     && rm -rf /var/lib/apt/lists/*
 COPY deploy/desktop-entrypoint.sh /usr/local/bin/desktop-entrypoint
 COPY deploy/desktop-session.sh /usr/local/bin/desktop-session
 RUN chmod 755 /usr/local/bin/desktop-entrypoint /usr/local/bin/desktop-session
 ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/desktop-entrypoint"]
+
+# VNC attaches to the existing X display; it never owns the desktop lifecycle.
+# VNC 连接现有 X 显示服务，不负责桌面的生命周期。
+FROM debian:bookworm-slim AS vnc
+RUN apt-get update && apt-get install -y --no-install-recommends x11vnc x11-utils tini \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd --create-home --uid 1000 developer
+USER developer
+ENTRYPOINT ["/usr/bin/tini", "--", "x11vnc"]
+# Separate IPC namespaces require socket capture instead of MIT-SHM.
+# 独立 IPC 命名空间通过 socket 截图，不使用 MIT-SHM。
+CMD ["-display", ":1", "-localhost", "-no6", "-rfbport", "5901", "-nopw", "-forever", "-shared", "-noxdamage", "-noshm"]

@@ -3,7 +3,7 @@
 
 [English](README.md) | 简体中文
 
-用 Go 独立实现的 SSH、SFTP 和 VNC 桌面控制台，以 MCP 工具提供能力。对外入口为 OpenAI 官方隧道，MCP 调用方鉴权完全由隧道负责；服务端不提供第二套 Bearer Token、OAuth、角色、审批、命令分类、命令黑白名单、路径沙箱或每日配额。
+用 Go 独立实现的 SSH、SFTP、原生 X11 桌面及可选 VNC控制台，以 MCP 工具提供能力。对外入口为 OpenAI 官方隧道，MCP 调用方鉴权完全由隧道负责；服务端不提供第二套 Bearer Token、OAuth、角色、审批、命令分类、命令黑白名单、路径沙箱或每日配额。
 
 参考了 `ssh-mcp-main 2` 的功能范围和 `SSH-MCP-main` 的部署方式。没有复制或包装其 TypeScript/Python 实现，也不依赖 npm 的 ssh-mcp。MCP、SSH、会话、SFTP、VNC、配置和启动逻辑均由本项目 Go 代码实现；隧道链路使用官方 tunnel-client。
 
@@ -15,20 +15,20 @@ OpenAI Tunnel ← 出站连接 ← 官方 tunnel-client
                                   │ stdio
                                   ▼
                              Go Console MCP
-                                  │ SSH / SFTP / 转发 VNC
+                                  │ SSH / SFTP / 原生 X11 / 转发 VNC
                                   ▼
                       Docker 开发环境 / 现有 SSH 主机
 ```
 
 没有 MCP HTTP 监听端口。`serve` 是由 tunnel-client 启动的本地 stdio 工作进程，也可用于本地测试；它本身不验证调用者身份。部署中不要另行将其通过 HTTP、TCP 或 socat 暴露。官方隧道的诊断界面仅绑定回环地址。
 
-当前源码版本：**0.2.0**。本独立项目采用 [MIT](LICENSE) 许可证。部署前请阅读[安全说明](SECURITY.zh-CN.md)：获授权的调用者拥有 SSH 账户的完整权限，当前不校验 SSH 目标主机公钥。
+当前源码版本：**0.3.0**。本独立项目采用 [MIT](LICENSE) 许可证。部署前请阅读[安全说明](SECURITY.zh-CN.md)：获授权的调用者拥有 SSH 账户的完整权限，当前不校验 SSH 目标主机公钥。
 
 ## 文档导航
 
 - [配置与命令行参考](docs/configuration.zh-CN.md)：默认值、凭据引用、初始化和校验范围。
 - [VNC 桌面指南](docs/vnc.zh-CN.md)：配置、截图、键鼠操作和边界。
-- [MCP 工具参考](docs/tool-reference.zh-CN.md)：17 个工具的参数、结果和错误语义。
+- [MCP 工具参考](docs/tool-reference.zh-CN.md)：21 个工具的参数、结果和错误语义。
 - [验证记录](docs/verification.zh-CN.md)及[正式部署记录](docs/live-deployment.zh-CN.md)：历史测试与真实隧道验收证据。
 
 - [贡献指南](CONTRIBUTING.zh-CN.md)、[安全说明](SECURITY.zh-CN.md)、[更新记录](CHANGELOG.zh-CN.md)及[第三方声明](THIRD_PARTY_NOTICES.zh-CN.md)。
@@ -50,6 +50,10 @@ OpenAI Tunnel ← 出站连接 ← 官方 tunnel-client
 | `sftp-upload` | 写入 UTF-8 或 base64 内容，覆盖已有远端文件 |
 | `sftp-download-file` | 流式下载到 MCP 进程所在文件系统，成功后替换本地目标文件 |
 | `sftp-upload-file` | 从 MCP 进程所在文件系统流式上传，覆盖远端文件 |
+| `desktop-screenshot` | 独立获取原生 X11 桌面 PNG，无需 VNC |
+| `desktop-pointer` | 直接移动、点击、拖动或滚动 |
+| `desktop-key` | 直接按下并释放组合键 |
+| `desktop-type` | 直接输入 Unicode 文本，无需剪贴板 |
 | `vnc-screenshot` | 返回原尺寸 PNG 的 MCP 图片内容及桌面元数据 |
 | `vnc-pointer` | 按截图像素坐标移动、点击、拖动或滚动 |
 | `vnc-key` | 按下并释放单键或组合键 |
@@ -59,15 +63,15 @@ OpenAI Tunnel ← 出站连接 ← 官方 tunnel-client
 
 不保留 `read-command`、`privileged-command`、`reload-config` 等旧接口：任意命令统一走 `run-command`，sudo 按目标操作系统的实际权限执行，修改配置后重启。没有声称是只读的任意 shell 工具。
 
-## 可选 VNC 桌面
+## 独立原生桌面与可选 VNC
 
-在 Docker 初始化向导选择 **3：自带图形桌面**，然后执行：
+在 Docker 初始化向导选择 **3：自带图形桌面**，可选 VNC 问题默认选 **n**，仅使用原生桌面，然后执行：
 
 ```sh
 docker compose -f compose.yaml -f compose.desktop.yaml up -d --build
 ```
 
-此选项增加 1280×800 的 TigerVNC/Openbox 桌面和 xterm 终端。VNC 仅监听开发容器回环端口 5901，经 SSH 访问，不发布宿主机 VNC 端口。先调用 `vnc-screenshot`，再发送输入并重新截图确认结果；外部桌面可按 SSH 配置启用，详见[完整 VNC 指南](docs/vnc.zh-CN.md)。
+此选项增加 1280×800 的 Xvfb/Openbox 桌面和 xterm。四项 `desktop-*` 工具经 SSH 直接截图及操作，无需 VNC 服务或客户端。若需 VNC 补充能力，选择 **y** 并增加 `-f compose.vnc.yaml`。独立管理的 x11vnc 服务连接同一显示环境，监听回环端口 5901；停止它不影响原生工具。不发布宿主机端口。详见[原生桌面指南](docs/desktop.zh-CN.md)和 [VNC 指南](docs/vnc.zh-CN.md)。
 
 ### 更名与升级兼容
 
@@ -306,7 +310,7 @@ TUNNEL_SSH_DEV_IMAGE=go-tunnel-ssh-dev:review \
 make docker-build docker-test # 初始化容器、真实交互向导、持久化/权限及 OpenSSH/PTY/SFTP
 ```
 
-自动化测试创建临时 SSH 主机和临时文件，不访问现有业务机器或线上隧道。2026-11-01 正式 MCP 容器已升级至 0.1.1；真实 OpenAI 隧道调用、SSH 命令和 SFTP 中文下载均已通过，ChatGPT 本次直接收到文件内容、编码与字节数，未再出现下载空对象。具体测试范围、运行证据及回退方式见 [验证记录](docs/verification.zh-CN.md) 和 [部署记录](docs/live-deployment.zh-CN.md)。
+自动化测试创建临时 SSH 主机和临时文件，不访问现有业务机器或线上隧道。0.3.0 容器检查覆盖 VNC 未启动时的原生截图及输入、双路径并用、停止 VNC 后继续原生操作。各版本测试范围、正式运行状态、真实 ChatGPT 证据和回退方式见[验证记录](docs/verification.zh-CN.md)和[部署记录](docs/live-deployment.zh-CN.md)。
 
 依赖锁定在 `go.mod` / `go.sum`。官方隧道版本固定为 v0.0.19，安装器通过发布的 `SHA256SUMS.txt` 核对下载归档，构建缓存与运行凭据均排除在 Git/Docker 构建上下文之外。开发镜像使用官方 Go 1.26.10、Node 24 镜像中的工具链，其余软件使用 Debian 软件源版本；APT 和基础镜像标签未固定到完整快照，构建不宣称逐字节可重现。
 

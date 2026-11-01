@@ -3,7 +3,7 @@
 
 [English](tool-reference.md) | 简体中文 | [README](../README.zh-CN.md)
 
-适用于 0.2.0。工具注册位于 `internal/server/server.go`，参数、返回类型和实现位于 `internal/remote`。下文 JSON 名称均为实际公共契约；配置默认值见[配置参考](configuration.zh-CN.md)。
+适用于 0.3.0。工具注册位于 `internal/server/server.go`，参数、返回类型和实现位于 `internal/remote`。下文 JSON 名称均为实际公共契约；配置默认值见[配置参考](configuration.zh-CN.md)。
 
 ## 通用约定
 
@@ -18,7 +18,7 @@
 
 ### `list-connections`
 
-输入 `{}`。返回按名称排序的数组，各项含 `name`、`host`、`port`、`user`、`workdir`、`default`、`sessions`、`status`、`vnc_enabled`。会话数包含已退出但保留的会话。状态为 `configured; connect on use`：该调用不进行 SSH 登录或连通性探测，也不暴露凭据。
+输入 `{}`。返回按名称排序的数组，各项含 `name`、`host`、`port`、`user`、`workdir`、`default`、`sessions`、`status`、`vnc_enabled` 和 `desktop_enabled`。会话数包含已退出但保留的会话。状态为 `configured; connect on use`：该调用不进行 SSH 登录或连通性探测，也不暴露凭据。
 
 ### `run-command`
 
@@ -132,6 +132,10 @@ list-sessions        {}
 ### `sftp-upload-file`
 
 输入必填远端目标 `path`、MCP 服务端源 `local_path` 和可选 `profile`。本地来源必须为普通文件。不受内联大小限制，覆盖远端目标；返回 `bytes` 和远端目标 `path`。与内联上传相同，远端写入不是原子的，失败时可能只写入部分内容。
+
+## 原生桌面工具
+
+`desktop-screenshot`、`desktop-pointer`、`desktop-key` 和 `desktop-type` 使用与下表 VNC 工具相同的参数、返回结构及输入边界；需要 `desktop.enabled = true`，不读取 VNC 配置或连接 VNC。每次操作通过 SSH 调用目标机的 `xwd` 或 `xdotool`；截图只接受 24 位 TrueColor、24/32 位存储的 XWD 并转换为原尺寸 PNG。只支持 Linux X11，不支持原生 Wayland/macOS/Windows 桌面；外部目标须具备显示权限、工具及 C.UTF-8。失败会返回工具错误，部分输入可能已发生，不自动切换 VNC 或重试。两条路径在同一 MCP 进程内共用操作队列，以防手势交错并限制图片内存；配置开关、目标、超时及服务生命周期独立。详见[原生桌面指南](desktop.zh-CN.md)。
 
 ## VNC 桌面工具
 

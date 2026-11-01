@@ -7,15 +7,15 @@
 
 ## 自带 Docker 桌面
 
-新部署运行初始化向导，选择 **3：自带图形桌面**：
+新部署运行初始化向导，选择 **3：自带图形桌面**，并在独立 VNC 问题回答 **y**：
 
 ```sh
 mkdir -p data init-input workspace
 docker compose -f compose.init.yaml run --rm --build init
-docker compose -f compose.yaml -f compose.desktop.yaml up -d --build
+docker compose -f compose.yaml -f compose.desktop.yaml -f compose.vnc.yaml up -d --build
 ```
 
-可选叠加配置只把开发镜像换成包含 TigerVNC/Openbox 和 xterm 的桌面镜像，继续使用 SSH 身份、开发用户主目录和工作区卷。桌面为 1280×800，显示编号 `:1`，VNC 监听目标容器回环接口的 5901 端口，不发布宿主机端口。桌面健康检查同时验证 SSH 和 X 显示服务。后续构建／启动桌面时使用两个 Compose 文件；已有容器的停止、启动和日志操作可使用基础文件。
+从 0.3.0 起，`compose.desktop.yaml` 提供 Xvfb/Openbox/xterm 及原生桌面工具，不安装 VNC；`compose.vnc.yaml` 单独添加 x11vnc 服务，共享 X11 socket 和开发容器网络命名空间。两条路径共用 1280×800 的 `:1` 桌面，VNC 仅监听回环端口 5901，不发布宿主机端口。后续管理命令保留三个 Compose 文件，可单独停止或重启 `vnc`，原生工具仍可使用。SSH 身份、开发主目录和工作区保持不变，详见[原生桌面操作](desktop.zh-CN.md)。
 
 已有部署应先备份完整配置和持久卷，停止 MCP，再以 `--reconfigure` 运行初始化向导，选择 3 后用叠加配置启动。重新配置会替换连接选择；若需要保留已有多配置，应导入完整 TOML。初始化本身既不启动也不测试 VNC。同一个隧道 ID 不要运行两个监督进程。原路径、Compose 项目标识和环境变量保留旧名称，见[升级兼容说明](../README.zh-CN.md#更名与升级兼容)。
 
@@ -85,6 +85,6 @@ vnc-pointer {"events":[{"x":300,"y":250,"buttons":16},{"x":300,"y":250,"buttons"
 
 VNC 未启用时检查当前配置并重启 MCP。SSH 转发失败时检查 SSH 的 `AllowTcpForwarding`、目标地址和 VNC 监听服务。认证不支持时，使用受保护回环地址上的 None 或 SSH 内的 VncAuth。鼠标坐标越界时重新截图；桌面尺寸可能在两次调用间改变。认证和帧错误返回 MCP `isError: true`，不返回成功图片数据。
 
-本地验收使用真实 TigerVNC、OpenSSH、xterm 和 MCP stdio 客户端，验证截图解码、真实鼠标位置、键盘效果、认证、清理和无公开端口。这本身不证明真实 ChatGPT 应用已经发现或显示新工具；还需升级目标部署后实际经隧道调用。
+本地验收使用真实 x11vnc、OpenSSH、xterm 和 MCP stdio 客户端，验证截图解码、真实鼠标位置、键盘效果、认证、清理和无公开端口。这本身不证明真实 ChatGPT 应用已经发现或显示新工具；还需升级目标部署后实际经隧道调用。
 
-协议参考：[RFB 规范](https://github.com/rfbproto/rfbproto/blob/master/rfbproto.rst)、[TigerVNC 服务端](https://tigervnc.org/doc/Xvnc.html)、[官方隧道配置](https://github.com/openai/tunnel-client/blob/v0.0.19/docs/configuration.md)。
+协议参考：[RFB 规范](https://github.com/rfbproto/rfbproto/blob/master/rfbproto.rst)、[x11vnc 服务端](https://github.com/LibVNC/x11vnc)、[官方隧道配置](https://github.com/openai/tunnel-client/blob/v0.0.19/docs/configuration.md)。

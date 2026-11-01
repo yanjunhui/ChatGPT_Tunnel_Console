@@ -61,6 +61,7 @@ jobs:
       TUNNEL_SSH_MCP_IMAGE: go-tunnel-ssh-mcp:ci
       TUNNEL_SSH_DEV_IMAGE: go-tunnel-ssh-dev:ci
       TUNNEL_CONSOLE_DESKTOP_IMAGE: go-tunnel-console-desktop:ci
+      TUNNEL_CONSOLE_VNC_IMAGE: go-tunnel-console-vnc:ci
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

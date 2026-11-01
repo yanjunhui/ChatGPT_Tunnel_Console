@@ -2,24 +2,12 @@
 package vnc
 
 import (
-	"bytes"
 	"encoding/binary"
 	"fmt"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/desktop"
 	"image"
-	"image/png"
 	"io"
 )
-
-type pngBuffer struct{ bytes.Buffer }
-
-// Write limits encoded output before buffering it; an oversized PNG is discarded.
-// 中文：Write 在缓存前限制编码输出大小，超限 PNG 整体丢弃。
-func (b *pngBuffer) Write(p []byte) (int, error) {
-	if b.Len()+len(p) > 16*1024*1024 {
-		return 0, fmt.Errorf("VNC screenshot exceeds 16 MiB PNG limit")
-	}
-	return b.Buffer.Write(p)
-}
 
 // Screenshot requests a full Raw framebuffer and returns a PNG at native size.
 // It rejects oversized, unsupported or out-of-bounds updates; transport closure
@@ -49,11 +37,7 @@ func (c *Client) Screenshot() ([]byte, error) {
 			}
 		}
 	}
-	var result pngBuffer
-	if err := png.Encode(&result, c.frame); err != nil {
-		return nil, err
-	}
-	return result.Bytes(), nil
+	return desktop.PNG(c.frame)
 }
 
 func (c *Client) requestFrame() error {

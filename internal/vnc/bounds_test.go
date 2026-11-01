@@ -4,6 +4,7 @@ package vnc
 import (
 	"bytes"
 	"encoding/binary"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/desktop"
 	"image/png"
 	"strings"
 	"testing"
@@ -99,20 +100,20 @@ func (s *transcript) inputBytes(t *testing.T) []byte {
 
 func TestInputBoundsBeforeSending(t *testing.T) {
 	for _, input := range []string{"", strings.Repeat("x", 4097), "\xff", "\x00", "\x1b"} {
-		if ValidateText(input) == nil {
+		if desktop.ValidateText(input) == nil {
 			t.Fatal("invalid text accepted")
 		}
 	}
-	if ValidateText(strings.Repeat("中", 4096)) != nil {
+	if desktop.ValidateText(strings.Repeat("中", 4096)) != nil {
 		t.Fatal("valid maximum text rejected")
 	}
 	for _, keys := range [][]string{nil, make([]string, 17), {"F13"}, {"unknown"}} {
-		if _, err := ValidateKeys(keys); err == nil {
+		if _, err := desktop.ValidateKeys(keys); err == nil {
 			t.Fatal("invalid chord accepted")
 		}
 	}
-	for _, events := range [][]PointerEvent{nil, make([]PointerEvent, 257), {{X: -1}}, {{Y: 8192}}, {{Buttons: 32}}} {
-		if ValidatePointer(events) == nil {
+	for _, events := range [][]desktop.PointerEvent{nil, make([]desktop.PointerEvent, 257), {{X: -1}}, {{Y: 8192}}, {{Buttons: 32}}} {
+		if desktop.ValidatePointer(events) == nil {
 			t.Fatal("invalid pointer accepted")
 		}
 	}
@@ -127,7 +128,7 @@ func TestInputBoundsBeforeSending(t *testing.T) {
 		t.Fatal(err)
 	}
 	s.output.Reset()
-	if err := c.Pointer([]PointerEvent{{X: 1, Y: 1, Buttons: 1}, {X: 100}}); err == nil || s.output.Len() != 0 {
+	if err := c.Pointer([]desktop.PointerEvent{{X: 1, Y: 1, Buttons: 1}, {X: 100}}); err == nil || s.output.Len() != 0 {
 		t.Fatal("invalid batch partly sent")
 	}
 	if err := c.Type("\r\n\t"); err != nil || s.output.Len() != 32 {

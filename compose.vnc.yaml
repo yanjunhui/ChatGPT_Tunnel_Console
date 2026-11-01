@@ -1,0 +1,22 @@
+# Created by Yanjunhui
+# Add after compose.desktop.yaml to enable an independently managed VNC service.
+# 在 compose.desktop.yaml 后叠加，启用可独立管理的 VNC 服务。
+services:
+  vnc:
+    image: ${TUNNEL_CONSOLE_VNC_IMAGE:-go-tunnel-console-vnc:latest}
+    build:
+      context: .
+      target: vnc
+    restart: unless-stopped
+    network_mode: service:dev
+    depends_on:
+      dev:
+        condition: service_healthy
+    volumes:
+      - x11_socket:/tmp/.X11-unix:ro
+    healthcheck:
+      test: ["CMD-SHELL", "DISPLAY=:1 xdpyinfo >/dev/null && grep -q ':170D .* 0A ' /proc/net/tcp"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 5s

@@ -6,5 +6,9 @@ services:
     image: ${TUNNEL_CONSOLE_DESKTOP_IMAGE:-go-tunnel-console-desktop:latest}
     build:
       target: desktop
+    volumes:
+      - x11_socket:/tmp/.X11-unix
     healthcheck:
       test: ["CMD-SHELL", "ssh -i /var/lib/tunnel-ssh/client_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o BatchMode=yes developer@127.0.0.1 'DISPLAY=:1 xdpyinfo >/dev/null'"]
+volumes:
+  x11_socket:

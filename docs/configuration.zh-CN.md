@@ -3,7 +3,7 @@
 
 [English](configuration.md) | 简体中文 | [README](../README.zh-CN.md)
 
-本文描述仓库 0.2.0 的实际实现，对应代码为 `internal/config`、`internal/setup`、`internal/tunnel` 和 `cmd/tunnel-console-mcp`。示例只使用占位值，不包含真实凭据。
+本文描述仓库 0.3.0 的实际实现，对应代码为 `internal/config`、`internal/setup`、`internal/tunnel` 和 `cmd/tunnel-console-mcp`。示例只使用占位值，不包含真实凭据。
 
 ## TOML 配置
 
@@ -36,6 +36,18 @@
 | `command_timeout` | `60s` | 独立命令的非负 Go duration；`0s` 禁用期限；持久会话不使用此值 |
 
 `private_key`、`password`、`agent_socket` 至少提供一项，可同时配置多种认证方式。当前实现不校验目标主机公钥；隧道的调用方认证不能证明外部 SSH 主机身份。
+
+### 可选原生桌面配置
+
+`[profiles.NAME.desktop]` 启用直接 Linux X11 操作，与 `[profiles.NAME.vnc]` 独立；两者均可选，可分别或同时启用。
+
+| 原生桌面字段 | 默认值／要求 | 含义 |
+|---|---|---|
+| `enabled` | false | 允许四项 `desktop-*` 工具 |
+| `display` | `:1` | 仅本地 X 显示编号，如 `:0`、`:0.0`；不允许 TCP 主机名 |
+| `timeout` | `15s` | 正值且不超过 `120s`，覆盖排队、SSH 和操作 |
+
+SSH 账户需要访问显示服务的权限，以及 `xwd`、`xdotool` 和 `C.UTF-8` locale。`check` 只验证配置，不探测显示服务或安装情况。详见[原生桌面指南](desktop.zh-CN.md)。
 
 ### 可选 VNC 配置
 
@@ -105,6 +117,7 @@ Docker 初始化以 root 运行，为非 root 正式账户设置归属。原生�
 | `TUNNEL_SSH_MCP_IMAGE` | `go-tunnel-ssh-mcp:latest` | 初始化和 MCP 运行共用的镜像标签 |
 | `TUNNEL_SSH_DEV_IMAGE` | `go-tunnel-ssh-dev:latest` | 开发镜像标签 |
 | `TUNNEL_CONSOLE_DESKTOP_IMAGE` | `go-tunnel-console-desktop:latest` | 可选桌面叠加镜像，替代开发镜像 |
+| `TUNNEL_CONSOLE_VNC_IMAGE` | `go-tunnel-console-vnc:latest` | 独立可选 VNC 服务镜像 |
 
 初始化与运行须使用相同配置挂载。备份 `data/` 时保留权限和符号链接。`developer_home` 与 `ssh_identity` 是持久化具名卷，`docker compose down -v` 会删除它们。
 

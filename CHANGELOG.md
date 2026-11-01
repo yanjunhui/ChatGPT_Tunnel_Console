@@ -3,6 +3,14 @@
 
 English | [简体中文](CHANGELOG.zh-CN.md)
 
+## 0.3.0 — 2026-11-01
+
+- Add four native `desktop-*` MCP tools over SSH/X11, independent of VNC; discovery now exposes 21 tools.
+- Split the bundled Xvfb desktop from the optional x11vnc service. Either tool backend can be enabled alone; stopping VNC preserves native screenshot/input access.
+- Add independent desktop configuration, an optional VNC initializer question, bounded XWD decoding and UTF-8 input handling for non-login SSH environments.
+- Add real-container independence, Unicode input and authentication checks, plus bilingual operation and upgrade documentation.
+- Clarify command metadata without changing target permissions; client-side approval rules remain in effect.
+
 ## 0.2.0 — 2026-11-01
 
 - Rename the project/repository to ChatGPT_Tunnel_Console, the Go module to `github.com/yanjunhui/ChatGPT_Tunnel_Console`, and the primary CLI to `tunnel-console-mcp`.

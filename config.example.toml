@@ -34,6 +34,12 @@ connect_timeout = "15s"
 # 0s 禁用命令期限；后台会话不使用此超时。
 command_timeout = "60s"
 
+# Optional native X11 desktop; independent of VNC. / 可选原生 X11 桌面，独立于 VNC。
+# [profiles.server.desktop]
+# enabled = true
+# display = ":1"
+# timeout = "15s"
+
 # Optional desktop, reached from the SSH target. Disabled unless explicitly enabled.
 # 可选桌面从 SSH 目标访问，只有显式启用后才生效。
 # [profiles.server.vnc]

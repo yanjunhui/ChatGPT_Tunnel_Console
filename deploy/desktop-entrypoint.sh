@@ -1,6 +1,7 @@
 #!/bin/sh
 # Created by Yanjunhui
 set -eu
+install -d -m 1777 /tmp/.X11-unix
 /usr/local/bin/dev-entrypoint &
 ssh_pid=$!
 runuser -u developer -- /usr/local/bin/desktop-session &

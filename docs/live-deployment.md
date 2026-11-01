@@ -3,9 +3,13 @@
 
 English | [简体中文](live-deployment.zh-CN.md)
 
-Date: 2026-11-01 (Asia/Shanghai). Project: `ChatGPT_Tunnel_SSH`.
+Date: 2026-11-01 (Asia/Shanghai). Project: `ChatGPT_Tunnel_Console`.
 
 ## Current deployment record
+
+The formal deployment reached **0.2.0** at 19:30:42 on 2026-11-01. MCP and the desktop container were recreated with the existing tunnel credentials, SSH identity, workspace and developer home. The poll-required health check passed. Real ChatGPT returned `vnc_enabled:true`, `developer`, `/workspace` and `E2E_CONSOLE_020_SSH_OK`; its cached tool list did not expose VNC tools, so screenshot/input acceptance was not claimed at this stage. Private backups and deployment evidence are in `.cache/upgrade-0.2.0/`. The earlier 0.1.1 record below is historical.
+
+## Historical 0.1.1 deployment
 
 The formal MCP container was upgraded to **0.1.1** at 2026-11-01 17:25:35. The real ChatGPT → OpenAI tunnel → Go MCP → SSH/SFTP path passed acceptance, including Chinese downloads, streaming file round trips, and an interactive terminal retaining its environment and working directory across calls. Dedicated test files and sessions were cleaned up.
 

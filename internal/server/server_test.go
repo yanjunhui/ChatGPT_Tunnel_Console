@@ -51,8 +51,8 @@ func TestMCPDiscoveryAndCommand(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(list.Tools) != 17 {
-		t.Fatalf("expected 17 tools; got %d", len(list.Tools))
+	if len(list.Tools) != 21 {
+		t.Fatalf("expected 21 tools; got %d", len(list.Tools))
 	}
 	for _, tool := range list.Tools {
 		if tool.Name == "run-command" && tool.Annotations.ReadOnlyHint {

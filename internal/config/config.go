@@ -37,17 +37,18 @@ type Tunnel struct {
 // 中文：Profile 描述一个 SSH 目标。密码和口令使用引用，私钥使用文件路径，
 // agent 使用 socket 路径或 env: 环境变量。
 type Profile struct {
-	Host           string `toml:"host"`
-	Port           int    `toml:"port"`
-	User           string `toml:"user"`
-	PrivateKey     string `toml:"private_key"`
-	Passphrase     string `toml:"passphrase"`
-	Password       string `toml:"password"`
-	AgentSocket    string `toml:"agent_socket"`
-	Workdir        string `toml:"workdir"`
-	ConnectTimeout string `toml:"connect_timeout"`
-	CommandTimeout string `toml:"command_timeout"`
-	VNC            *VNC   `toml:"vnc,omitempty"`
+	Host           string   `toml:"host"`
+	Port           int      `toml:"port"`
+	User           string   `toml:"user"`
+	PrivateKey     string   `toml:"private_key"`
+	Passphrase     string   `toml:"passphrase"`
+	Password       string   `toml:"password"`
+	AgentSocket    string   `toml:"agent_socket"`
+	Workdir        string   `toml:"workdir"`
+	ConnectTimeout string   `toml:"connect_timeout"`
+	CommandTimeout string   `toml:"command_timeout"`
+	VNC            *VNC     `toml:"vnc,omitempty"`
+	Desktop        *Desktop `toml:"desktop,omitempty"`
 }
 
 // Load reads a TOML file. Relative file paths resolve against that file.
@@ -149,7 +150,12 @@ func (p *Profile) normalize(base string) error {
 		return fmt.Errorf("private_key, password, or agent_socket is required")
 	}
 	if p.VNC != nil {
-		return p.VNC.normalize(base)
+		if err := p.VNC.normalize(base); err != nil {
+			return err
+		}
+	}
+	if p.Desktop != nil {
+		return p.Desktop.normalize()
 	}
 	return nil
 }

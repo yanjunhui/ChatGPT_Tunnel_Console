@@ -6,6 +6,7 @@ export GOMODCACHE := $(CURDIR)/.cache/mod
 export GOCACHE := $(CURDIR)/.cache/build
 export TMPDIR := $(CURDIR)/.cache/tmp
 TUNNEL_CONSOLE_DESKTOP_IMAGE ?= go-tunnel-console-desktop:latest
+TUNNEL_CONSOLE_VNC_IMAGE ?= go-tunnel-console-vnc:latest
 
 .PHONY: prepare build test vet linux install-tunnel docker-build docker-test desktop-build desktop-test check tidy vuln secrets
 prepare:
@@ -25,11 +26,12 @@ install-tunnel: build
 docker-test: prepare
 	TUNNEL_SSH_DOCKER_TEST=1 go test -race -count=1 -timeout=240s -run '^TestDocker' -v ./cmd/tunnel-console-mcp
 docker-build: prepare
-	docker compose build dev mcp
+	docker compose -f compose.yaml build dev mcp
 desktop-build: prepare
 	docker build --target desktop -t "$(TUNNEL_CONSOLE_DESKTOP_IMAGE)" .
+	docker build --target vnc -t "$(TUNNEL_CONSOLE_VNC_IMAGE)" .
 desktop-test: prepare
-	TUNNEL_CONSOLE_VNC_TEST=1 TUNNEL_CONSOLE_DESKTOP_IMAGE="$(TUNNEL_CONSOLE_DESKTOP_IMAGE)" go test -race -count=1 -timeout=240s -run '^TestDockerVNC' -v ./cmd/tunnel-console-mcp
+	TUNNEL_CONSOLE_VNC_TEST=1 TUNNEL_CONSOLE_DESKTOP_IMAGE="$(TUNNEL_CONSOLE_DESKTOP_IMAGE)" TUNNEL_CONSOLE_VNC_IMAGE="$(TUNNEL_CONSOLE_VNC_IMAGE)" go test -race -count=1 -timeout=300s -run '^TestDockerVNC' -v ./cmd/tunnel-console-mcp
 check: prepare
 	@test -z "$$(gofmt -l cmd internal)" || { gofmt -l cmd internal; exit 1; }
 	python3 scripts/check_docs.py

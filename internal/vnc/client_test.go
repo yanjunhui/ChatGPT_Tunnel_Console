@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/hex"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/desktop"
 	"image/png"
 	"io"
 	"testing"
@@ -122,10 +123,10 @@ func TestInputValidationAndRelease(t *testing.T) {
 		t.Fatal(err)
 	}
 	s.output.Reset()
-	if err = c.Pointer([]PointerEvent{{X: 100, Y: 0}}); err == nil || s.output.Len() != 0 {
+	if err = c.Pointer([]desktop.PointerEvent{{X: 100, Y: 0}}); err == nil || s.output.Len() != 0 {
 		t.Fatal("invalid input sent")
 	}
-	if err = c.Pointer([]PointerEvent{{X: 10, Y: 20, Buttons: 1}, {X: 30, Y: 40, Buttons: 1}}); err != nil {
+	if err = c.Pointer([]desktop.PointerEvent{{X: 10, Y: 20, Buttons: 1}, {X: 30, Y: 40, Buttons: 1}}); err != nil {
 		t.Fatal(err)
 	}
 	want := []byte{5, 1, 0, 10, 0, 20, 5, 1, 0, 30, 0, 40, 5, 0, 0, 30, 0, 40}

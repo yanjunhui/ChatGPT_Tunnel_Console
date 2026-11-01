@@ -38,15 +38,16 @@ func New(c *config.Config) *Manager {
 // ConnectionInfo exposes non-secret settings and the number of retained sessions.
 // 中文：ConnectionInfo 返回不含凭据的配置及保留会话数，其中可包含已退出会话。
 type ConnectionInfo struct {
-	Name       string `json:"name"`
-	Host       string `json:"host"`
-	Port       int    `json:"port"`
-	User       string `json:"user"`
-	Workdir    string `json:"workdir"`
-	Default    bool   `json:"default"`
-	Sessions   int    `json:"sessions"`
-	Status     string `json:"status"`
-	VNCEnabled bool   `json:"vnc_enabled"`
+	Name           string `json:"name"`
+	Host           string `json:"host"`
+	Port           int    `json:"port"`
+	User           string `json:"user"`
+	Workdir        string `json:"workdir"`
+	Default        bool   `json:"default"`
+	Sessions       int    `json:"sessions"`
+	Status         string `json:"status"`
+	VNCEnabled     bool   `json:"vnc_enabled"`
+	DesktopEnabled bool   `json:"desktop_enabled"`
 }
 
 // Connections reports configuration, not an unperformed connectivity check.
@@ -59,6 +60,7 @@ func (m *Manager) Connections() []ConnectionInfo {
 	for name, p := range m.config.Profiles {
 		info := ConnectionInfo{Name: name, Host: p.Host, Port: p.Port, User: p.User, Workdir: p.Workdir, Default: name == m.config.DefaultProfile, Status: "configured; connect on use"}
 		info.VNCEnabled = p.VNC != nil && p.VNC.Enabled
+		info.DesktopEnabled = p.Desktop != nil && p.Desktop.Enabled
 		for key := range m.sessions {
 			if key.profile == name {
 				info.Sessions++

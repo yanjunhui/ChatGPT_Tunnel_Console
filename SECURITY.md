@@ -30,7 +30,7 @@ Keep Go and dependencies patched; run `make vuln` and review dependency-update P
 
 ## Desktop access scope
 
-VNC is explicitly enabled per SSH profile. Screenshots can expose signed-in sessions, private files or application credentials, and input can perform actions allowed by the desktop account. Callers share that desktop; serialized tool calls do not provide tenant isolation or exclude other VNC clients. Read-only annotations do not redact screen content.
+Native desktop and VNC are independently and explicitly enabled per SSH profile. The native path uses the target account’s X11 access; the optional VNC service shares the same display. The bundled X server has no TCP listener; its Unix socket is shared only with the optional sidecar. Local processes in either container can access this trusted desktop. Stopping VNC does not revoke native desktop access. Screenshots can expose signed-in sessions, private files or application credentials, and input can perform actions allowed by the desktop account. Callers share that desktop; serialized tool calls do not provide tenant isolation or exclude other VNC clients. Read-only annotations do not redact screen content.
 
 The bundled desktop uses None authentication on loopback only, reached through SSH forwarding, with no published VNC port. Classic VncAuth's eight-byte password authentication does not replace encryption. SSH encrypts traffic only to the SSH host; if VNC is on another LAN host, that final segment is unencrypted. VNC TLS/VeNCrypt is unsupported, and the existing lack of SSH host-key verification still applies.
 

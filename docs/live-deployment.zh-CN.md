@@ -3,9 +3,13 @@
 
 [English](live-deployment.md) | 简体中文
 
-日期：2026-11-01（Asia/Shanghai）。项目：`ChatGPT_Tunnel_SSH`。
+日期：2026-11-01（Asia/Shanghai）。项目：`ChatGPT_Tunnel_Console`。
 
 ## 当前状态
+
+正式环境于 2026-11-01 19:30:42 升级至 **0.2.0**。MCP 和桌面容器重建，继续使用原隧道凭据、SSH 身份、工作区和开发主目录。要求控制面成功轮询的健康检查通过；真实 ChatGPT 返回 `vnc_enabled:true`、`developer`、`/workspace` 和 `E2E_CONSOLE_020_SSH_OK`。但聊天缓存工具列表未暴露 VNC 工具，因此该阶段未宣称截图／输入已验收。私有备份及部署证据位于 `.cache/upgrade-0.2.0/`；以下 0.1.1 记录属于历史阶段。
+
+## 历史 0.1.1 部署
 
 正式 MCP 容器已于 2026-11-01 17:25:35 升级至 **0.1.1**。真实 ChatGPT → OpenAI 隧道 → Go MCP → SSH/SFTP 链路已验收通过，包括中文下载、流式文件往返及跨调用保留变量和目录的交互终端。专用测试文件及会话已清理。
 

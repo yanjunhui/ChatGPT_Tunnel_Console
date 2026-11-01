@@ -44,7 +44,7 @@ func TestRealStdioProcess(t *testing.T) {
 	}
 	defer c.Close()
 	tools, err := c.ListTools(t.Context(), nil)
-	if err != nil || len(tools.Tools) != 17 {
+	if err != nil || len(tools.Tools) != 21 {
 		t.Fatalf("tool discovery: %+v %v", tools, err)
 	}
 	result, err := c.CallTool(t.Context(), &mcp.CallToolParams{Name: "run-command", Arguments: map[string]any{"command": "printf STDIO_SUCCESS"}})

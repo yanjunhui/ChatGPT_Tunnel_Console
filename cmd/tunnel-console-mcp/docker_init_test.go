@@ -19,6 +19,7 @@ type dockerInitRig struct {
 	project           string
 	env               []string
 	desktop           bool
+	vnc               bool
 }
 
 func newDockerInitRig(t *testing.T) dockerInitRig {
@@ -39,7 +40,9 @@ func newDockerInitRig(t *testing.T) dockerInitRig {
 	t.Cleanup(func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
-		if out, err := r.command(ctx, false, "down", "-v", "--remove-orphans").CombinedOutput(); err != nil {
+		cleanup := r
+		cleanup.desktop, cleanup.vnc = true, true
+		if out, err := cleanup.command(ctx, false, "down", "-v", "--remove-orphans").CombinedOutput(); err != nil {
 			t.Errorf("Docker init cleanup: %v %s", err, out)
 		}
 	})
@@ -54,6 +57,9 @@ func (r dockerInitRig) command(ctx context.Context, init bool, args ...string) *
 	options := []string{"compose", "-p", r.project, "-f", filepath.Join(r.root, file)}
 	if r.desktop && !init {
 		options = append(options, "-f", filepath.Join(r.root, "compose.desktop.yaml"))
+	}
+	if r.vnc && !init {
+		options = append(options, "-f", filepath.Join(r.root, "compose.vnc.yaml"))
 	}
 	cmd := exec.CommandContext(ctx, "docker", append(options, args...)...)
 	cmd.Env, cmd.Dir = r.env, r.root
@@ -155,7 +161,7 @@ func (r dockerInitRig) checkWorker(t *testing.T) {
 	}
 	defer c.Close()
 	tools, err := c.ListTools(ctx, nil)
-	if err != nil || len(tools.Tools) != 17 {
+	if err != nil || len(tools.Tools) != 21 {
 		t.Fatalf("tool discovery: %+v %v", tools, err)
 	}
 	dockerCheckCommand(t, ctx, c)

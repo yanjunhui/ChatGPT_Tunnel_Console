@@ -9,11 +9,12 @@ import (
 	"time"
 
 	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/config"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/desktop"
 	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/vnc"
 )
 
-// DesktopInput selects an explicitly VNC-enabled SSH profile, or the default.
-// 中文：DesktopInput 选择显式启用 VNC 的 SSH 配置；空名称使用默认配置。
+// DesktopInput selects an SSH profile with the requested desktop backend enabled.
+// 中文：DesktopInput 选择启用所请求桌面后端的 SSH 配置；空名称使用默认配置。
 type DesktopInput struct {
 	Profile string `json:"profile,omitempty"`
 }
@@ -22,7 +23,7 @@ type DesktopInput struct {
 // 中文：PointerInput 按原图像素坐标描述一次移动、点击、拖动或滚动手势。
 type PointerInput struct {
 	DesktopInput
-	Events []vnc.PointerEvent `json:"events" jsonschema:"1..256 events; x/y are native screenshot pixels; buttons: left 1, middle 2, right 4, wheel-up 8, wheel-down 16. A final release is sent automatically."`
+	Events []desktop.PointerEvent `json:"events" jsonschema:"1..256 events; x/y are native screenshot pixels; buttons: left 1, middle 2, right 4, wheel-up 8, wheel-down 16. A final release is sent automatically."`
 }
 
 // KeyInput presses one chord, then releases it; keys are not held across calls.
@@ -42,17 +43,17 @@ type TextInput struct {
 // InputResult acknowledges transport delivery, not completion in the application.
 // 中文：InputResult 仅确认传输已发送，不表示目标应用已完成操作。
 type InputResult struct {
-	Info    vnc.Info `json:"desktop"`
-	Message string   `json:"message"`
+	Info    desktop.Info `json:"desktop"`
+	Message string       `json:"message"`
 }
 
 // Screenshot returns a native PNG plus metadata, or a profile/SSH/RFB error.
 // The connection is closed on completion, cancellation or the profile deadline.
 // 中文：Screenshot 返回原尺寸 PNG 及元数据，或配置／SSH／RFB 错误；
 // 操作完成、取消或达到配置期限时关闭连接。
-func (m *Manager) Screenshot(ctx context.Context, in DesktopInput) ([]byte, vnc.Info, error) {
+func (m *Manager) Screenshot(ctx context.Context, in DesktopInput) ([]byte, desktop.Info, error) {
 	var data []byte
-	var info vnc.Info
+	var info desktop.Info
 	err := m.withDesktop(ctx, in.Profile, func(client *vnc.Client) error {
 		var err error
 		data, err = client.Screenshot()
@@ -66,7 +67,7 @@ func (m *Manager) Screenshot(ctx context.Context, in DesktopInput) ([]byte, vnc.
 // Partial delivery is possible on transport failure; callers must inspect again.
 // 中文：Pointer 校验并通过 SSH 发送手势及释放事件；传输失败可能部分发送，须重新查看。
 func (m *Manager) Pointer(ctx context.Context, in PointerInput) (InputResult, error) {
-	if err := vnc.ValidatePointer(in.Events); err != nil {
+	if err := desktop.ValidatePointer(in.Events); err != nil {
 		return InputResult{}, err
 	}
 	return m.desktopInput(ctx, in.Profile, func(c *vnc.Client) error { return c.Pointer(in.Events) })
@@ -75,7 +76,7 @@ func (m *Manager) Pointer(ctx context.Context, in PointerInput) (InputResult, er
 // Key validates and sends a chord with releases, returning delivery or I/O errors.
 // 中文：Key 校验并发送组合键和释放事件，返回发送结果或 I/O 错误。
 func (m *Manager) Key(ctx context.Context, in KeyInput) (InputResult, error) {
-	if _, err := vnc.ValidateKeys(in.Keys); err != nil {
+	if _, err := desktop.ValidateKeys(in.Keys); err != nil {
 		return InputResult{}, err
 	}
 	return m.desktopInput(ctx, in.Profile, func(c *vnc.Client) error { return c.Key(in.Keys) })
@@ -84,7 +85,7 @@ func (m *Manager) Key(ctx context.Context, in KeyInput) (InputResult, error) {
 // Type validates the entire text before connecting and sends Unicode key pairs.
 // 中文：Type 在连接前验证全部文本，然后发送 Unicode 按下／释放事件对。
 func (m *Manager) Type(ctx context.Context, in TextInput) (InputResult, error) {
-	if err := vnc.ValidateText(in.Text); err != nil {
+	if err := desktop.ValidateText(in.Text); err != nil {
 		return InputResult{}, err
 	}
 	return m.desktopInput(ctx, in.Profile, func(c *vnc.Client) error { return c.Type(in.Text) })

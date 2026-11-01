@@ -6,26 +6,19 @@ package vnc
 import (
 	"encoding/binary"
 	"fmt"
+	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/desktop"
 	"image"
 	"io"
 )
 
 const maxPixels = 8 * 1024 * 1024
 
-// Info is the current desktop size in pixels and its server-provided name.
-// 中文：Info 包含桌面像素尺寸及服务端提供的名称。
-type Info struct {
-	Width  int    `json:"width"`
-	Height int    `json:"height"`
-	Name   string `json:"name"`
-}
-
 // Client is not concurrency-safe. The caller closes its transport on cancellation.
 // Framebuffers are allocated only for screenshots, not for keyboard/mouse calls.
 // 中文：Client 不支持并发使用，调用者须在取消时关闭传输；仅截图分配帧缓冲。
 type Client struct {
 	rw      io.ReadWriter
-	info    Info
+	info    desktop.Info
 	frame   *image.RGBA
 	covered int
 }
@@ -61,7 +54,7 @@ func New(rw io.ReadWriter, password string) (*Client, error) {
 
 // Info returns metadata without another network request.
 // 中文：Info 返回当前元数据，不另行发送网络请求。
-func (c *Client) Info() Info { return c.info }
+func (c *Client) Info() desktop.Info { return c.info }
 
 func (c *Client) initialize() error {
 	if err := c.write([]byte{1}); err != nil {

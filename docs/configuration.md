@@ -3,7 +3,7 @@
 
 English | [简体中文](configuration.zh-CN.md) | [README](../README.md)
 
-This reference describes the repository's 0.2.0 implementation. See `internal/config`, `internal/setup`, `internal/tunnel` and `cmd/tunnel-console-mcp` for the corresponding code. Examples use placeholders, never real credentials.
+This reference describes the repository's 0.3.0 implementation. See `internal/config`, `internal/setup`, `internal/tunnel` and `cmd/tunnel-console-mcp` for the corresponding code. Examples use placeholders, never real credentials.
 
 ## TOML configuration
 
@@ -36,6 +36,18 @@ This reference describes the repository's 0.2.0 implementation. See `internal/co
 | `command_timeout` | `60s` | Nonnegative Go duration for independent commands; `0s` disables that deadline; persistent sessions do not use it |
 
 At least one of `private_key`, `password` or `agent_socket` must be configured. Multiple authentication methods may be supplied. The implementation does not check target host keys. Tunnel caller authentication does not establish the identity of an external SSH host.
+
+### Optional native desktop configuration
+
+`[profiles.NAME.desktop]` enables direct Linux X11 operations independently of `[profiles.NAME.vnc]`. Both are optional; either or both may be enabled.
+
+| Desktop field | Default / requirement | Meaning |
+|---|---|---|
+| `enabled` | false | Allow the four `desktop-*` tools |
+| `display` | `:1` | Local X display only, such as `:0` or `:0.0`; no TCP hostname |
+| `timeout` | `15s` | Positive and at most `120s`, covering queueing, SSH and the operation |
+
+The SSH account needs access to that display, `xwd`, `xdotool` and the `C.UTF-8` locale. `check` validates settings without probing the display or installed programs. See the [native desktop guide](desktop.md).
 
 ### Optional VNC configuration
 
@@ -105,6 +117,7 @@ Native generations live under `/usr/local/lib/tunnel-ssh-mcp/releases/`; contain
 | `TUNNEL_SSH_MCP_IMAGE` | `go-tunnel-ssh-mcp:latest` | Image tag shared by initialization and MCP runtime |
 | `TUNNEL_SSH_DEV_IMAGE` | `go-tunnel-ssh-dev:latest` | Development image tag |
 | `TUNNEL_CONSOLE_DESKTOP_IMAGE` | `go-tunnel-console-desktop:latest` | Optional desktop overlay image, replacing the development image |
+| `TUNNEL_CONSOLE_VNC_IMAGE` | `go-tunnel-console-vnc:latest` | Independent optional VNC service image |
 
 Use the same configuration mount for initialization and runtime. Keep `data/` permissions and symlinks when backing up. `developer_home` and `ssh_identity` are persistent named volumes; `docker compose down -v` removes them.
 

@@ -4,6 +4,10 @@ package setup
 import "github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/config"
 
 func prepareDesktop(d draft, p config.Profile, name, directory string, files map[string][]byte) (config.Profile, error) {
+	if p.Desktop != nil {
+		desktop := *p.Desktop
+		p.Desktop = &desktop
+	}
 	if p.VNC == nil {
 		return p, nil
 	}
