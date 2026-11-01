@@ -22,7 +22,7 @@ install-tunnel: build
 	./bin/tunnel-ssh-mcp install-tunnel --dir ./bin
 docker-test: prepare
 	TUNNEL_SSH_DOCKER_TEST=1 go test -race -count=1 -timeout=240s -run '^TestDocker' -v ./cmd/tunnel-ssh-mcp
-docker-build:
+docker-build: prepare
 	docker compose build dev mcp
 check: prepare
 	@test -z "$$(gofmt -l cmd internal)" || { gofmt -l cmd internal; exit 1; }

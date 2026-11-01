@@ -9,6 +9,7 @@ English | [简体中文](CHANGELOG.zh-CN.md)
 - Raise the minimum Go toolchain and Docker build baseline to 1.26.10 after vulnerability review.
 - Align the Go module path with `github.com/yanjunhui/ChatGPT_Tunnel_SSH`.
 - Allow separate Compose image tags for acceptance builds and formal deployments.
+- Create the project temporary directory before Docker builds, including in a fresh checkout.
 - Prepare the public source release with MIT licensing, bilingual contribution/security/third-party documentation, CI, dependency updates, documentation checks and secret scanning. Redact private deployment identifiers from published records.
 
 MCP tool contracts remain compatible with 0.1.1. This source release does not automatically upgrade an existing deployment; the recorded formal deployment remains 0.1.1.
