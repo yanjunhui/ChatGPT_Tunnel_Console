@@ -123,7 +123,7 @@ func (r dockerInitRig) vncClient(t *testing.T) (context.Context, *mcp.ClientSess
 func desktopScreenshot(t *testing.T, ctx context.Context, c *mcp.ClientSession, backend, profile string, width, height int) {
 	t.Helper()
 	result, err := c.CallTool(ctx, &mcp.CallToolParams{Name: backend + "-screenshot", Arguments: map[string]any{"profile": profile}})
-	if err != nil || result.IsError || result.StructuredContent == nil || len(result.Content) != 2 {
+	if err != nil || result.IsError || result.StructuredContent != nil || len(result.Content) != 2 {
 		t.Fatalf("screenshot failed: %v %+v", err, result)
 	}
 	image, ok := result.Content[0].(*mcp.ImageContent)
@@ -139,7 +139,12 @@ func desktopScreenshot(t *testing.T, ctx context.Context, c *mcp.ClientSession, 
 			t.Fatal(err)
 		}
 	}
-	t.Logf("PNG %dx%d: %d bytes, structured metadata present", width, height, len(image.Data))
+	metadata, ok := result.Content[1].(*mcp.TextContent)
+	var info struct{ Width, Height int }
+	if !ok || json.Unmarshal([]byte(metadata.Text), &info) != nil || info.Width != width || info.Height != height {
+		t.Fatal("screenshot metadata missing or inconsistent")
+	}
+	t.Logf("PNG %dx%d: %d bytes, image and text metadata present", width, height, len(image.Data))
 }
 
 func desktopCommand(t *testing.T, ctx context.Context, c *mcp.ClientSession, command string) string {

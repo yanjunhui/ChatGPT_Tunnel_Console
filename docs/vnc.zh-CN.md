@@ -52,7 +52,7 @@ vnc-key          {"profile":"local-dev","keys":["Return"]}
 vnc-screenshot   {"profile":"local-dev"}
 ```
 
-`vnc-screenshot` 的 `content[0]` 为 MCP 图片（`image/png`，JSON 传输时使用 base64），`content[1].text` 为元数据 JSON，`structuredContent` 同样包含 `width`、`height`、`name`。客户端须支持 MCP 图片显示；结果不是本地截图路径，也不是纯文本 base64。坐标基于原始图片尺寸，左上角为原点；即使客户端缩放了预览，也应使用原图像素坐标。
+`vnc-screenshot` 的 `content[0]` 为 MCP 图片（`image/png`，JSON 传输时使用 base64），`content[1].text` 为包含 `width`、`height`、`name` 的元数据 JSON。客户端须支持 MCP 图片显示；结果不是本地截图路径，也不是纯文本 base64。坐标基于原始图片尺寸，左上角为原点；即使客户端缩放了预览，也应使用原图像素坐标。
 
 鼠标按钮使用位掩码：左键 1、中键 2、右键 4、向上滚动 8、向下滚动 16；0 释放全部按钮。一批事件表示一次手势，结束时自动释放。例如：
 

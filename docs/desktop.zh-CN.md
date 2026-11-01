@@ -76,7 +76,7 @@ desktop-key         {"profile":"local-dev","keys":["Return"]}
 desktop-screenshot  {"profile":"local-dev"}
 ```
 
-`list-connections` 分别返回 `desktop_enabled` 和 `vnc_enabled`；两者是配置开关，不是实时探测结果。截图返回 MCP PNG 图片及结构化宽、高、名称；输入仅确认事件送达，应重新截图核对应用效果，焦点错误可能把输入发送到其他位置。主动选择另一条路径时，用相同参数结构调用 `vnc-*`。仅操作任务已经授权的桌面与应用。
+`list-connections` 分别返回 `desktop_enabled` 和 `vnc_enabled`；两者是配置开关，不是实时探测结果。截图返回 MCP PNG 图片及文本 JSON 形式的宽、高、名称；输入仅确认事件送达，应重新截图核对应用效果，焦点错误可能把输入发送到其他位置。主动选择另一条路径时，用相同参数结构调用 `vnc-*`。仅操作任务已经授权的桌面与应用。
 
 两条路径均限制鼠标事件 1–256、组合键 1–16、Unicode 字符 1–4096、截图单边 8192 像素、总像素 8,388,608、PNG 16 MiB，默认操作期限 15 秒（最多 120 秒）。键名、按钮位及错误语义见[工具参考](tool-reference.zh-CN.md)。原生截图要求 24 位 TrueColor、24/32 位存储，非法或截断帧报错，不返回部分图片。Unicode 呈现仍受目标应用和输入法影响。
 

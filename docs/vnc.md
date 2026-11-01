@@ -52,7 +52,7 @@ vnc-key          {"profile":"local-dev","keys":["Return"]}
 vnc-screenshot   {"profile":"local-dev"}
 ```
 
-`vnc-screenshot` returns `content[0]` as an MCP image (`image/png`, base64 on the JSON wire), `content[1].text` as metadata JSON, and the same metadata in `structuredContent`: `width`, `height`, `name`. The client must support MCP image display. It is not a local screenshot path or text-only base64 result. Coordinates use the original image size with origin at the top left; a client may visually scale the preview, so use native pixel coordinates.
+`vnc-screenshot` returns `content[0]` as an MCP image (`image/png`, base64 on the JSON wire), `content[1].text` as metadata JSON containing `width`, `height`, `name`. The client must support MCP image display. It is not a local screenshot path or text-only base64 result. Coordinates use the original image size with origin at the top left; a client may visually scale the preview, so use native pixel coordinates.
 
 Mouse buttons are a bit mask: left 1, middle 2, right 4, wheel up 8, wheel down 16. Zero releases all buttons. A batch is one gesture and automatically ends with a release. Examples:
 

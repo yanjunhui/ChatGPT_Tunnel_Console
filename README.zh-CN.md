@@ -22,7 +22,7 @@ OpenAI Tunnel ← 出站连接 ← 官方 tunnel-client
 
 没有 MCP HTTP 监听端口。`serve` 是由 tunnel-client 启动的本地 stdio 工作进程，也可用于本地测试；它本身不验证调用者身份。部署中不要另行将其通过 HTTP、TCP 或 socat 暴露。官方隧道的诊断界面仅绑定回环地址。
 
-当前源码版本：**0.3.0**。本独立项目采用 [MIT](LICENSE) 许可证。部署前请阅读[安全说明](SECURITY.zh-CN.md)：获授权的调用者拥有 SSH 账户的完整权限，当前不校验 SSH 目标主机公钥。
+当前源码版本：**0.3.1**。本独立项目采用 [MIT](LICENSE) 许可证。部署前请阅读[安全说明](SECURITY.zh-CN.md)：获授权的调用者拥有 SSH 账户的完整权限，当前不校验 SSH 目标主机公钥。
 
 ## 文档导航
 

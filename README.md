@@ -22,7 +22,7 @@ OpenAI Tunnel <-- outbound connection <-- official tunnel-client
 
 There is no MCP HTTP listener. `serve` is a local stdio worker launched by tunnel-client and also used by tests; it does not authenticate callers itself. Do not separately expose it through HTTP, TCP or socat. The official tunnel diagnostics bind only to loopback.
 
-Current source version: **0.3.0**. This independent project is licensed under [MIT](LICENSE). See the [security policy](SECURITY.md) before deployment: authorized callers have the SSH account’s full permissions, and SSH target host keys are not verified.
+Current source version: **0.3.1**. This independent project is licensed under [MIT](LICENSE). See the [security policy](SECURITY.md) before deployment: authorized callers have the SSH account’s full permissions, and SSH target host keys are not verified.
 
 ## Documentation
 

@@ -17,7 +17,7 @@ func TestDesktopToolsAndDisabledProfile(t *testing.T) {
 	for _, tool := range list.Tools {
 		switch tool.Name {
 		case "vnc-screenshot", "desktop-screenshot":
-			if !tool.Annotations.ReadOnlyHint || tool.OutputSchema == nil {
+			if !tool.Annotations.ReadOnlyHint || tool.OutputSchema != nil {
 				t.Fatal("screenshot contract missing")
 			}
 			seen[tool.Name] = true

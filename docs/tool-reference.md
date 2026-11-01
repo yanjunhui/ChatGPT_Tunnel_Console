@@ -3,14 +3,14 @@
 
 English | [简体中文](tool-reference.zh-CN.md) | [README](../README.md)
 
-Applies to 0.3.0. Tool registration is in `internal/server/server.go`; input/result types and operations are in `internal/remote`. JSON names below are the actual public contract. Configuration defaults are documented in [configuration.md](configuration.md).
+Applies to 0.3.1. Tool registration is in `internal/server/server.go`; input/result types and operations are in `internal/remote`. JSON names below are the actual public contract. Configuration defaults are documented in [configuration.md](configuration.md).
 
 ## Shared conventions
 
 - Unless stated otherwise, `profile` is an optional string selecting an SSH profile; omitted/empty selects `default_profile`. An unknown name is an error. `list-sessions` selects one profile, not all profiles.
 - Required fields must be supplied even when an empty string is meaningful, such as upload content or input sent only to close stdin. Remote `path` must be nonempty. Session names must be nonblank and are unique within a profile, including retained exited sessions.
 - `path` belongs to the SSH host. Relative remote paths use its configured `workdir`. `local_path` belongs to the MCP server, not the ChatGPT client, and relative local paths use the MCP process working directory. Use absolute paths for predictable streaming behavior. No transfer-root restriction is applied.
-- Except for screenshots, tools return JSON in MCP `content[0].text` on success. `sftp-download` additionally declares an `outputSchema` and supplies `structuredContent`; `vnc-screenshot` returns an image and structured metadata (below). Decode text for other tools.
+- Except for screenshots, tools return JSON in MCP `content[0].text` on success. `sftp-download` additionally declares an `outputSchema` and supplies `structuredContent`; both screenshot tools return an image and text metadata (below). Decode text for other tools.
 - Validation, connection and operation failures return MCP tool errors (`isError: true`). Independent command execution failures retain stdout/stderr and status fields in their JSON result and set `isError: true` when `error` is nonempty. Nonzero exit status is a failure, even if output was produced.
 - Read-only annotations describe intended behavior for clients; they are not enforcement or authorization. Arbitrary commands, uploads and server-side file downloads are not read-only.
 
@@ -143,9 +143,11 @@ All four tools accept optional `profile`, require `vnc.enabled = true`, and use 
 
 | Tool | Required arguments | Successful result |
 |---|---|---|
-| `vnc-screenshot` | None | `content[0]` is an `image/png` image; `content[1].text` and `structuredContent` contain `width`, `height`, `name`; declares `outputSchema` |
+| `vnc-screenshot` | None | `content[0]` is an `image/png` image; `content[1].text` contains JSON with `width`, `height`, `name` |
 | `vnc-pointer` | `events`: 1–256 objects with integer `x`, `y`, `buttons` | Text JSON: `desktop` (width/height/name) and `message` |
 | `vnc-key` | `keys`: 1–16 strings representing a key or chord | Same as above |
 | `vnc-type` | `text`: 1–4096 Unicode characters | Same as above |
 
 Screenshots return native PNG only after full-frame coverage: at most 8192 per side, 8,388,608 total pixels and 16 MiB encoded PNG. Pointer coordinates start at the top left; the entire batch is validated against the current desktop before sending. Button bits are left 1/middle 2/right 4/up-scroll 8/down-scroll 16, zero releases, and a final release is automatic. Chords press in order and release in reverse. Text uses key events, treats CRLF as one Return and supports CR/LF and Tab; invalid UTF-8 and other controls fail. Clipboard is not used. Input results acknowledge writes only; capture again to confirm application state. Only screenshots are annotated read-only; input tools are not.
+
+Since 0.3.1, both screenshot tools omit `outputSchema` and metadata-only `structuredContent`: real ChatGPT exposed only the dimensions and hid the image when that structured result was present. Existing image and text content blocks remain unchanged. Clients previously reading structured screenshot dimensions should parse `content[1].text` instead. SFTP downloads retain their typed structured results.

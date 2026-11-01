@@ -3,14 +3,14 @@
 
 [English](tool-reference.md) | 简体中文 | [README](../README.zh-CN.md)
 
-适用于 0.3.0。工具注册位于 `internal/server/server.go`，参数、返回类型和实现位于 `internal/remote`。下文 JSON 名称均为实际公共契约；配置默认值见[配置参考](configuration.zh-CN.md)。
+适用于 0.3.1。工具注册位于 `internal/server/server.go`，参数、返回类型和实现位于 `internal/remote`。下文 JSON 名称均为实际公共契约；配置默认值见[配置参考](configuration.zh-CN.md)。
 
 ## 通用约定
 
 - 除另有说明，`profile` 是可选字符串，用于选择 SSH 配置；省略或空值使用 `default_profile`，未知配置名报错。`list-sessions` 只查询一个配置，不查询全部配置。
 - 必填字段即使允许空字符串也须提供，例如上传内容或只关闭 stdin 时的输入。远端 `path` 不得为空。会话名称不得为空白，在同一配置内唯一，已退出但仍保留的会话也占用名称。
 - `path` 属于 SSH 主机，相对路径以配置的 `workdir` 为基准。`local_path` 属于 MCP 服务端，不属于 ChatGPT 客户端；相对本地路径以 MCP 进程工作目录为基准。建议流式传输使用绝对路径。不存在传输根目录限制。
-- 除截图外，工具成功时在 MCP `content[0].text` 中返回 JSON。`sftp-download` 额外声明 `outputSchema` 并返回 `structuredContent`；`vnc-screenshot` 返回图片和结构化元数据（见下文）。其他工具需解析文本。
+- 除截图外，工具成功时在 MCP `content[0].text` 中返回 JSON。`sftp-download` 额外声明 `outputSchema` 并返回 `structuredContent`；两种截图工具返回图片和文本元数据（见下文）。其他工具需解析文本。
 - 参数、连接和操作失败返回 MCP 工具错误（`isError: true`）。独立命令执行失败时仍在 JSON 中保留 stdout/stderr 和状态；`error` 非空时设为工具错误。非零退出即为失败，不能因存在输出而视为成功。
 - 只读注解是给客户端的行为说明，不是强制策略或授权。任意命令、上传及写入服务端文件的下载均非只读。
 
@@ -143,9 +143,11 @@ list-sessions        {}
 
 | 工具 | 必填参数 | 成功结果 |
 |---|---|---|
-| `vnc-screenshot` | 无 | `content[0]` 为 `image/png` 图片；`content[1].text` 与 `structuredContent` 均包含 `width`、`height`、`name`；声明 `outputSchema` |
+| `vnc-screenshot` | 无 | `content[0]` 为 `image/png` 图片；`content[1].text` 包含 `width`、`height`、`name` 的 JSON |
 | `vnc-pointer` | `events`：1–256 个含整数 `x`、`y`、`buttons` 的对象 | 文本 JSON：`desktop`（width/height/name）和 `message` |
 | `vnc-key` | `keys`：1–16 个字符串，表示单键或组合键 | 同上 |
 | `vnc-type` | `text`：1–4096 个 Unicode 字符 | 同上 |
 
 截图仅在全帧覆盖后返回原尺寸 PNG：单边最多 8192、总像素最多 8,388,608、PNG 最多 16 MiB。鼠标坐标从左上角开始，发送前验证整批事件位于当前桌面；按钮位左1／中2／右4／上滚8／下滚16，0释放，结束时自动释放。组合键依次按下、逆序释放。文本通过按键发送，CRLF 视为一次 Return，CR/LF 和 Tab 受支持；无效 UTF-8 和其他控制字符拒绝，不使用剪贴板。输入结果只确认事件写入，须重新截图确认应用状态。仅截图标注只读；键鼠工具非只读。
+
+从 0.3.1 起，两种截图工具省略 `outputSchema` 和仅含元数据的 `structuredContent`，因为真实 ChatGPT 在同时存在该结构化输出时只显示尺寸、遮蔽图片。原有图片及文本内容块保持不变；此前依赖结构化截图尺寸的客户端应改为解析 `content[1].text`。SFTP 下载仍保留类型化结构化结果。

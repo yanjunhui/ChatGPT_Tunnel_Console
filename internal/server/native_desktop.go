@@ -6,22 +6,23 @@ import (
 	"encoding/json"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/desktop"
 	"github.com/yanjunhui/ChatGPT_Tunnel_Console/internal/remote"
 )
 
 func registerNativeDesktop(s *mcp.Server, manager *remote.Manager) {
+	// Metadata-only structured output hides image content in ChatGPT; keep both content blocks.
+	// 中文：仅元数据的结构化输出会遮蔽 ChatGPT 图片，故保留图片和文本内容块。
 	mcp.AddTool(s, &mcp.Tool{Name: "desktop-screenshot", Description: "Capture the configured native X11 desktop directly over SSH, independently of VNC. Returns PNG image content and native width/height metadata. Use native pixels for input.", Annotations: &mcp.ToolAnnotations{ReadOnlyHint: true}},
-		func(ctx context.Context, _ *mcp.CallToolRequest, in remote.DesktopInput) (*mcp.CallToolResult, desktop.Info, error) {
+		func(ctx context.Context, _ *mcp.CallToolRequest, in remote.DesktopInput) (*mcp.CallToolResult, any, error) {
 			data, info, err := manager.DesktopScreenshot(ctx, in)
 			if err != nil {
-				return nil, desktop.Info{}, err
+				return nil, nil, err
 			}
 			metadata, err := json.Marshal(info)
 			if err != nil {
-				return nil, desktop.Info{}, err
+				return nil, nil, err
 			}
-			return &mcp.CallToolResult{Content: []mcp.Content{&mcp.ImageContent{Data: data, MIMEType: "image/png"}, &mcp.TextContent{Text: string(metadata)}}}, info, nil
+			return &mcp.CallToolResult{Content: []mcp.Content{&mcp.ImageContent{Data: data, MIMEType: "image/png"}, &mcp.TextContent{Text: string(metadata)}}}, nil, nil
 		})
 	bind(s, "desktop-pointer", "Move/click/drag/scroll on the native X11 desktop directly over SSH. Use screenshot pixel coordinates. Buttons are released after each gesture; inspect a new screenshot after input.", false, manager.DesktopPointer)
 	bind(s, "desktop-key", "Press and release a key chord on the native X11 desktop over SSH, without VNC. Inspect application state after input; do not blindly retry errors.", false, manager.DesktopKey)
