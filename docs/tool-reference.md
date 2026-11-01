@@ -3,7 +3,7 @@
 
 English | [简体中文](tool-reference.zh-CN.md) | [README](../README.md)
 
-Applies to 0.3.2. Tool registration is in `internal/server/server.go`; input/result types and operations are in `internal/remote`. JSON names below are the actual public contract. Configuration defaults are documented in [configuration.md](configuration.md).
+Applies to 0.3.3. Tool registration is in `internal/server/server.go`; input/result types and operations are in `internal/remote`. JSON names below are the actual public contract. Configuration defaults are documented in [configuration.md](configuration.md).
 
 ## Shared conventions
 
@@ -131,7 +131,11 @@ Input: required remote `path` and MCP-server `local_path`, optional `profile`. S
 
 ### `sftp-upload-file`
 
-Input: required remote destination `path` and MCP-server source `local_path`, optional `profile`. The local source must be a regular file. Streams without an inline-size limit and overwrites the remote target. Returns `bytes` and the remote destination `path`. The remote write is not atomic and may be partial on failure, just like inline upload.
+Input: required remote destination `path`, optional `profile`, and exactly one source: `local_path` on the MCP server or ChatGPT `file`. `file` declares required `download_url` and `file_id`, plus optional `mime_type` and `file_name`; tool metadata advertises `openai/fileParams: ["file"]`. ChatGPT supplies the attachment object without placing file bytes in model context. File metadata never determines the destination path.
+
+Local-path uploads preserve the existing streaming behavior: source must be regular, no inline limit, remote writes may be partial on failure. Attachment downloads allow HTTPS on port 443 only, with no userinfo/fragment; approved host families are `oaiusercontent.com`, `openai.com`, `chatgpt.com`, `oaistatic.com`, `amazonaws.com`, `blob.core.windows.net`, and `googleapis.com`. Redirects are validated (maximum five), proxies are bypassed, public DNS results are pinned for connection, and Referer is removed. Signed URLs and response bodies are omitted from errors. Expired links require a fresh ChatGPT file.
+
+Attachments stage to a private mode-0600 temporary file with a 512 MiB limit (including unknown-length responses) and a five-minute download deadline. Empty files are supported. After a complete download, SFTP writes a private sibling file and publishes with POSIX rename; unsupported servers fail rather than weakening atomicity. Success replaces the destination with mode 0600, returning `bytes` and remote `path`. Failure preserves the original destination. Local staging is removed; remote temporary-file cleanup is best effort if SSH has already disconnected. See the [attachment guide](attachments.md).
 
 ## Native desktop tools
 

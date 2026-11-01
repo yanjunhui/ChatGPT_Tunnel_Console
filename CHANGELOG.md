@@ -3,6 +3,11 @@
 
 English | [简体中文](CHANGELOG.zh-CN.md)
 
+## 0.3.3 — 2026-11-01
+
+- Add ChatGPT attachment uploads through `openai/fileParams`, keeping local-path uploads compatible. Validate HTTPS destinations and public DNS addresses, redact signed URLs, cap attachment staging at 512 MiB, and publish through atomic SFTP rename.
+- Add regression tests and bilingual attachment documentation.
+
 ## 0.3.2 — 2026-11-01
 
 - Improve native Unicode delivery with a longer non-ASCII key delay; add multi-script real-desktop readback checks. ASCII pacing and VNC input remain unchanged.

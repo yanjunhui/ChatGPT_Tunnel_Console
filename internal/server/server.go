@@ -14,7 +14,7 @@ import (
 
 // Version identifies both the CLI release and the MCP server implementation.
 // 中文：Version 同时标识 CLI 版本和 MCP 服务实现版本。
-const Version = "0.3.2"
+const Version = "0.3.3"
 
 type profileInput struct {
 	Profile string `json:"profile,omitempty"`
@@ -93,7 +93,7 @@ func registerFiles(s *mcp.Server, manager *remote.Manager) {
 		})
 	bind(s, "sftp-upload", "Write UTF-8 or base64 content to a remote file via SFTP. Existing files are overwritten. Parent directory must exist.", false, manager.Upload)
 	bind(s, "sftp-download-file", "Stream a remote file to local_path on the MCP server filesystem. Publishes on success and overwrites an existing local file. No transfer-root restrictions.", false, manager.DownloadFile)
-	bind(s, "sftp-upload-file", "Stream local_path on the MCP server filesystem to the SSH host. Overwrites an existing remote file. No transfer-root restrictions.", false, manager.UploadFile)
+	registerAttachmentUpload(s, manager)
 }
 
 func signal(ctx context.Context, manager *remote.Manager, in signalInput) (remote.CommandResult, error) {

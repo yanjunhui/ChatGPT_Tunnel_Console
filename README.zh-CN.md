@@ -22,7 +22,7 @@ OpenAI Tunnel ← 出站连接 ← 官方 tunnel-client
 
 没有 MCP HTTP 监听端口。`serve` 是由 tunnel-client 启动的本地 stdio 工作进程，也可用于本地测试；它本身不验证调用者身份。部署中不要另行将其通过 HTTP、TCP 或 socat 暴露。官方隧道的诊断界面仅绑定回环地址。
 
-当前源码版本：**0.3.2**。本独立项目采用 [MIT](LICENSE) 许可证。部署前请阅读[安全说明](SECURITY.zh-CN.md)：获授权的调用者拥有 SSH 账户的完整权限，当前不校验 SSH 目标主机公钥。
+当前源码版本：**0.3.3**。本独立项目采用 [MIT](LICENSE) 许可证。部署前请阅读[安全说明](SECURITY.zh-CN.md)：获授权的调用者拥有 SSH 账户的完整权限，当前不校验 SSH 目标主机公钥。
 
 ## 文档导航
 
@@ -49,7 +49,7 @@ OpenAI Tunnel ← 出站连接 ← 官方 tunnel-client
 | `sftp-download` | 读取 UTF-8 或 base64 内容 |
 | `sftp-upload` | 写入 UTF-8 或 base64 内容，覆盖已有远端文件 |
 | `sftp-download-file` | 流式下载到 MCP 进程所在文件系统，成功后替换本地目标文件 |
-| `sftp-upload-file` | 从 MCP 进程所在文件系统流式上传，覆盖远端文件 |
+| `sftp-upload-file` | 将 ChatGPT 附件或 MCP 服务端本地文件上传到 SSH 主机 |
 | `desktop-screenshot` | 独立获取原生 X11 桌面 PNG，无需 VNC |
 | `desktop-pointer` | 直接移动、点击、拖动或滚动 |
 | `desktop-key` | 直接按下并释放组合键 |

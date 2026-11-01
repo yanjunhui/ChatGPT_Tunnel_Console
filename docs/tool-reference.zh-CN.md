@@ -3,7 +3,7 @@
 
 [English](tool-reference.md) | 简体中文 | [README](../README.zh-CN.md)
 
-适用于 0.3.2。工具注册位于 `internal/server/server.go`，参数、返回类型和实现位于 `internal/remote`。下文 JSON 名称均为实际公共契约；配置默认值见[配置参考](configuration.zh-CN.md)。
+适用于 0.3.3。工具注册位于 `internal/server/server.go`，参数、返回类型和实现位于 `internal/remote`。下文 JSON 名称均为实际公共契约；配置默认值见[配置参考](configuration.zh-CN.md)。
 
 ## 通用约定
 
@@ -131,7 +131,11 @@ list-sessions        {}
 
 ### `sftp-upload-file`
 
-输入必填远端目标 `path`、MCP 服务端源 `local_path` 和可选 `profile`。本地来源必须为普通文件。不受内联大小限制，覆盖远端目标；返回 `bytes` 和远端目标 `path`。与内联上传相同，远端写入不是原子的，失败时可能只写入部分内容。
+输入必填远端目标 `path`、可选 `profile`，并且在 MCP 服务端 `local_path` 与 ChatGPT `file` 中选择且仅选择一个。`file` 声明必填 `download_url`、`file_id` 和可选 `mime_type`、`file_name`；工具元数据声明 `openai/fileParams: ["file"]`。ChatGPT 自动提供附件对象，文件字节不进入模型上下文；附件元数据不用于选择目标路径。
+
+本地路径保留原有流式行为：来源必须为普通文件，不受内联上限限制，失败时远端可能部分写入。附件仅允许 HTTPS 443、无用户信息或片段的 URL；允许域名及其子域为 `oaiusercontent.com`、`openai.com`、`chatgpt.com`、`oaistatic.com`、`amazonaws.com`、`blob.core.windows.net`、`googleapis.com`。最多五次重定向且逐次校验；不使用代理，连接固定到已验证公网 DNS 地址，并移除 Referer。错误不包含签名 URL 或响应正文，链接过期时需重新提供 ChatGPT 文件。
+
+附件先暂存到 0600 私有临时文件，大小上限 512 MiB（含未知长度响应），下载期限五分钟，支持空文件。完整下载后，经 SFTP 写入同目录私有临时文件并以 POSIX rename 发布；不支持此扩展的服务器直接报错，不降低原子性。成功以 0600 文件替换目标，返回 `bytes` 和远端 `path`；失败保留原目标。本地暂存会删除；若 SSH 已断开，远端临时文件仅能尽力清理。详见[附件指南](attachments.zh-CN.md)。
 
 ## 原生桌面工具
 
