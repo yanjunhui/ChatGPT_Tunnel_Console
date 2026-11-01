@@ -222,3 +222,15 @@ Date: 2026-11-01 (Asia/Shanghai). The native backend uses X11 over SSH; the opti
 Reproduced and fixed during acceptance: an ASCII SSH locale rejected Unicode; 1 ms xdotool input could lose temporary Unicode mappings (12 ms restored readback); `mousemove --sync` stalled at unchanged coordinates (exit 124 under a one-second reproduction); cross-container MIT-SHM access failed, so the separate VNC service uses socket capture with `-noshm`. IPv6 listeners are disabled in that sidecar.
 
 Evidence is private under `.cache/independent-desktop/`. These local checks do not substitute for the real ChatGPT calls recorded separately in [live deployment](live-deployment.md). Host reboot recovery, network-failure recovery and external native desktop installation were not tested in this stage.
+
+## 0.3.1–0.3.2 real-client compatibility fixes
+
+Date: 2026-11-01 (Asia/Shanghai). These fixes follow the independent-backend implementation above.
+
+- A real ChatGPT A/B check kept identical PNG image and text blocks, but removed metadata-only structured output from the native screenshot tool. ChatGPT could then read an undisclosed desktop marker through native capture; the unchanged VNC result still exposed only dimensions. Version 0.3.1 applied the fix to both tools, and both read `VISUAL_PROOF_CEDAR_5873` from actual 1280×800 screenshots without SSH/SFTP reads.
+- Real ChatGPT input then exposed a native Unicode loss: the expected `NATIVE_031:中文` became `NATIVE_031:文`; VNC returned `VNC_031:中文` correctly. Successful event acknowledgments were not counted as successful input.
+- Isolated normal/fresh-desktop repetitions did not reproduce every occurrence. A controlled 20 ms pause of xterm reproduced Unicode loss in 10/10 trials with the old 12 ms setting and 10/10 with 50 ms; 100 ms passed 10/10. The bundled [xdotool 3.20160805.1 source](https://github.com/jordansissel/xdotool/blob/v3.20160805.1/xdo.c) divides the type delay twice before restoring a temporary mapping. This supports the timing mechanism; it does not measure the original application's scheduling delay.
+- Version 0.3.2 uses 100 ms for non-ASCII input/chords and retains 12 ms for ASCII. Real-container regression now also reads back Chinese, Greek and Japanese strings before VNC starts. Input still needs application-level verification; stalled applications and long text are documented limits.
+- Full race tests, vet, native macOS arm64 and Linux arm64/amd64 builds passed. The initialization/OpenSSH suite and real native/VNC desktop suite passed with the 0.3.2 runtime image; the latter included no VNC, both backends, authenticated VNC and native operation after VNC stopped. Source/comment and 32-document checks passed. Version 0.3.1's four GitHub CI jobs also passed; later commit status remains visible in Actions.
+
+Private evidence: `.cache/independent-desktop/031-*.log`, `032-*.log`, `unicode-reproduction.log`, `unicode-fresh-with-stdin.log`, `consumer-delay.log` and `consumer-delay-100.log`. Formal deployment and final real ChatGPT outcomes are recorded separately in [live deployment](live-deployment.md).

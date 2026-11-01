@@ -222,3 +222,15 @@ sha256:de4f8528ea967944a30097fb1732771d80aa807889ba17624de5ba8e73b0b114
 验收中复现并修复：SSH 的 ASCII locale 拒绝中文；xdotool 的 1 毫秒输入间隔可能漏收临时 Unicode 键位（12 毫秒恢复回读）；`mousemove --sync` 在坐标不变时阻塞（一秒复现返回 124）；跨容器 MIT-SHM 访问失败，独立 VNC 因此使用 `-noshm` 的 socket 截图，并关闭 IPv6 监听。
 
 证据私有保存在 `.cache/independent-desktop/`。本地检查不替代[正式部署记录](live-deployment.zh-CN.md)中单列的真实 ChatGPT 调用。本阶段未验证宿主机重启恢复、断网恢复或外部原生桌面安装。
+
+## 0.3.1–0.3.2 真实客户端兼容性修复
+
+日期：2026-11-01（Asia/Shanghai）。本节修复发生在上述独立后端实现之后。
+
+- 真实 ChatGPT A/B 对照保留相同的 PNG 图片及文本块，仅移除原生截图中仅含元数据的结构化输出。随后 ChatGPT 能经原生截图读出未在提示中提供的桌面标记，而保持旧格式的 VNC 仍只暴露尺寸。0.3.1 将修复应用到两种工具后，两者均从真实 1280×800 图片读出 `VISUAL_PROOF_CEDAR_5873`，没有经 SSH/SFTP 读取。
+- 真实 ChatGPT 输入随后暴露原生 Unicode 漏字：预期 `NATIVE_031:中文`，实际为 `NATIVE_031:文`；VNC 正确返回 `VNC_031:中文`。没有把事件送达确认当成输入验收成功。
+- 隔离的普通／新桌面重复测试未复现每次漏字；受控暂停 xterm 20 毫秒时，旧 12 毫秒设置连续 10/10 次漏字，50 毫秒仍为 10/10 次，100 毫秒则 10/10 次通过。自带 [xdotool 3.20160805.1 源码](https://github.com/jordansissel/xdotool/blob/v3.20160805.1/xdo.c) 在恢复临时映射前两次平分 type 间隔，支持该时序机制解释，但不能据此量出最初应用的调度延迟。
+- 0.3.2 对非 ASCII 文本／组合键使用 100 毫秒，ASCII 保留 12 毫秒；真实容器回归还在 VNC 启动前回读中文、希腊文和日文。输入仍需应用层验证；无响应应用及长文本限制已写入文档。
+- 全量竞态、vet、macOS arm64 原生及 Linux arm64/amd64 构建通过。使用 0.3.2 运行镜像的初始化／OpenSSH 和真实原生／VNC 桌面套件通过，后者覆盖无 VNC、双后端、VNC 认证及停止 VNC 后原生继续操作。源码／注释及 32 份文档检查通过；0.3.1 的四项 GitHub CI 也已通过，后续提交状态可在 Actions 查看。
+
+私有证据：`.cache/independent-desktop/031-*.log`、`032-*.log`、`unicode-reproduction.log`、`unicode-fresh-with-stdin.log`、`consumer-delay.log`、`consumer-delay-100.log`。正式部署及最终真实 ChatGPT 结果另记于[部署记录](live-deployment.zh-CN.md)。

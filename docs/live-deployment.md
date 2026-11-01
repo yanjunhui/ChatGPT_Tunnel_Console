@@ -5,9 +5,39 @@ English | [简体中文](live-deployment.zh-CN.md)
 
 Date: 2026-11-01 (Asia/Shanghai). Project: `ChatGPT_Tunnel_Console`.
 
-## Current deployment record
+## Current deployment: 0.3.2
 
-The formal deployment reached **0.2.0** at 19:30:42 on 2026-11-01. MCP and the desktop container were recreated with the existing tunnel credentials, SSH identity, workspace and developer home. The poll-required health check passed. Real ChatGPT returned `vnc_enabled:true`, `developer`, `/workspace` and `E2E_CONSOLE_020_SSH_OK`; its cached tool list did not expose VNC tools, so screenshot/input acceptance was not claimed at this stage. Private backups and deployment evidence are in `.cache/upgrade-0.2.0/`. The earlier 0.1.1 record below is historical.
+The formal MCP runtime reached **0.3.2** at 20:16:44 on 2026-11-01. The bundled native X11 desktop and separately managed VNC service use the tested 0.3.0 images; only MCP changed for the 0.3.1 screenshot and 0.3.2 Unicode fixes. Existing tunnel credentials, SSH identity, workspace and developer home were retained. There are no published host ports.
+
+| Check | Observed result |
+|---|---|
+| Running version | `tunnel-console-mcp version` returned `0.3.2` |
+| Runtime images | `go-tunnel-console-mcp:0.3.2`, `go-tunnel-console-desktop:0.3.0`, `go-tunnel-console-vnc:0.3.0` |
+| Executable SHA-256 | `1fe712315dc2c3faff3b16443760e4da7653b1d16a60a2efc6c8df604458603c` |
+| Tunnel health | Required successful control-plane poll; live/ready HTTP 200; result `ok` |
+| Real ChatGPT SSH | `developer`, `/workspace`, exit 0; configuration discovery separately reported both desktop capabilities enabled |
+| Real screenshots | Both paths returned visible 1280×800 PNGs; ChatGPT read an undisclosed `VISUAL_PROOF_CEDAR_5873` marker from each without SSH/SFTP reads |
+| Native input | Pointer, Control+u, text and Return produced `NATIVE_032:中文汉字αβ日文あいう`; readback was exact, mouse `(407,663)` |
+| VNC input | Pointer, chord, text and Return produced `VNC_031:中文` with exact readback; mouse `(410,203)` |
+| VNC stopped | VNC screenshot returned `Connection refused`; native capture and all input tools remained usable and produced `NATIVE_WITH_VNC_STOPPED:中文` |
+| Service independence | Stopping VNC did not restart MCP or dev; the dev start time remained 19:54:33 and MCP 20:16:44 |
+| VNC restored | Returned to `healthy`; real ChatGPT used VNC screenshot/pointer/key/type again and read back `VNC_RESTORED_032:中文` exactly |
+| Cleanup | The five known test files were hashed and privately archived before removal; the dedicated directory was removed and its absence independently checked; ChatGPT `list-sessions` returned `[]` |
+| Source CI | All four jobs passed for [0.3.2 source commit](https://github.com/yanjunhui/ChatGPT_Tunnel_Console/actions/runs/41305716797), including Linux amd64 Docker integration |
+
+The screenshot A/B comparison and initial Unicode failure are preserved in the [verification record](verification.md). They were actual acceptance failures that required fixes, not successful checks. Input acknowledgment alone is never used as proof that an application processed the input. These results cover the bundled Linux X11 desktop, not native macOS/Windows/Wayland desktops, host reboot or network-outage recovery.
+
+### Current operation and rollback
+
+The local `.env` selects all three Compose files and explicit image tags. Use `docker compose stop vnc` / `docker compose start vnc` to manage only the optional service; `desktop-*` remains independent of it. Both backends still use SSH and share the X display supplied by dev. See [the desktop guide](desktop.md) for native-only configuration and external VNC targets.
+
+Private backups and evidence are in `.cache/upgrade-0.3.0/`: the pre-upgrade `data`/workspace archive, developer-home/SSH-identity volume archive, prior environment files, container snapshots, activation logs, health results and ChatGPT evidence. Prior 0.2.0/0.3.0/0.3.1 images are retained. A runtime-only rollback requires stopping MCP, restoring the selected image tag in `.env`, then recreating only MCP with `--no-deps --no-build --pull never`; it ends in-memory sessions. Older versions restore their documented screenshot/Unicode limitations. A full 0.2.0 rollback also requires its matching configuration generation and two-file Compose setup. No successful-upgrade rollback drill was performed.
+
+All sections below are historical deployment records, not the current container inventory or current rollback procedure.
+
+## Historical 0.2.0 deployment
+
+The formal deployment reached **0.2.0** at 19:30:42 on 2026-11-01. The poll-required health check and real ChatGPT SSH passed; the cached tool list did not expose VNC tools at that stage, so screenshot/input acceptance was not claimed. Private backups and evidence remain in `.cache/upgrade-0.2.0/`.
 
 ## Historical 0.1.1 deployment
 

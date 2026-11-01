@@ -5,9 +5,39 @@
 
 日期：2026-11-01（Asia/Shanghai）。项目：`ChatGPT_Tunnel_Console`。
 
-## 当前状态
+## 当前部署：0.3.2
 
-正式环境于 2026-11-01 19:30:42 升级至 **0.2.0**。MCP 和桌面容器重建，继续使用原隧道凭据、SSH 身份、工作区和开发主目录。要求控制面成功轮询的健康检查通过；真实 ChatGPT 返回 `vnc_enabled:true`、`developer`、`/workspace` 和 `E2E_CONSOLE_020_SSH_OK`。但聊天缓存工具列表未暴露 VNC 工具，因此该阶段未宣称截图／输入已验收。私有备份及部署证据位于 `.cache/upgrade-0.2.0/`；以下 0.1.1 记录属于历史阶段。
+正式 MCP 于 2026-11-01 20:16:44 升级至 **0.3.2**。自带原生 X11 桌面及独立管理的 VNC 服务沿用已验证的 0.3.0 镜像；0.3.1 截图与 0.3.2 Unicode 修复仅替换 MCP。原隧道凭据、SSH 身份、工作区及开发主目录均保留，没有宿主机端口映射。
+
+| 检查 | 实际结果 |
+|---|---|
+| 运行版本 | `tunnel-console-mcp version` 返回 `0.3.2` |
+| 运行镜像 | `go-tunnel-console-mcp:0.3.2`、`go-tunnel-console-desktop:0.3.0`、`go-tunnel-console-vnc:0.3.0` |
+| 可执行文件 SHA-256 | `1fe712315dc2c3faff3b16443760e4da7653b1d16a60a2efc6c8df604458603c` |
+| 隧道健康 | 要求控制面轮询成功；live/ready HTTP 200，结果 `ok` |
+| 真实 ChatGPT SSH | 返回 `developer`、`/workspace`、退出码 0；配置发现另确认两种桌面能力已启用 |
+| 真实截图 | 两条路径均返回可见的 1280×800 PNG；ChatGPT 分别读出未在提示中提供的 `VISUAL_PROOF_CEDAR_5873`，没有经 SSH/SFTP 读取 |
+| 原生输入 | 鼠标、Control+u、文本和回车生成 `NATIVE_032:中文汉字αβ日文あいう`，精确回读通过，鼠标 `(407,663)` |
+| VNC 输入 | 鼠标、组合键、文本和回车生成 `VNC_031:中文`，精确回读通过，鼠标 `(410,203)` |
+| 停止 VNC | VNC 截图返回 `Connection refused`；原生截图及全部输入工具仍可用，并生成 `NATIVE_WITH_VNC_STOPPED:中文` |
+| 服务独立性 | 停止 VNC 未重启 MCP 或 dev；dev 启动时间保持 19:54:33、MCP 保持 20:16:44 |
+| 恢复 VNC | 恢复 `healthy`；真实 ChatGPT 再次调用 VNC 截图／鼠标／按键／文本，精确回读 `VNC_RESTORED_032:中文` |
+| 清理 | 五个已知测试文件核对哈希、私有归档后移除；专用目录已删除，并独立确认不存在；ChatGPT `list-sessions` 返回 `[]` |
+| 源码 CI | [0.3.2 源码提交](https://github.com/yanjunhui/ChatGPT_Tunnel_Console/actions/runs/41305716797)四项任务全部通过，含 Linux amd64 Docker 集成 |
+
+截图 A/B 对照及最初 Unicode 失败保留于[验证记录](verification.zh-CN.md)。这些是真实失败并触发修复，未计为验收成功；输入送达确认不作为应用处理成功证据。结果覆盖自带 Linux X11 桌面，不包含原生 macOS/Windows/Wayland 桌面、宿主机重启或断网恢复。
+
+### 当前操作与回退
+
+本地 `.env` 选择三个 Compose 文件及明确镜像标签。使用 `docker compose stop vnc` / `docker compose start vnc` 仅管理可选服务，`desktop-*` 独立于它。两条后端仍依赖 SSH，并共享 dev 提供的 X 显示服务；仅原生配置及外部 VNC 目标见[桌面指南](desktop.zh-CN.md)。
+
+私有备份及证据位于 `.cache/upgrade-0.3.0/`，包括升级前 data／工作区归档、开发主目录／SSH 身份卷归档、原环境文件、容器快照、部署日志、健康结果及 ChatGPT 证据。0.2.0/0.3.0/0.3.1 镜像继续保留。仅回退 MCP 时，应先停止 MCP，在 `.env` 恢复所选镜像标签，再以 `--no-deps --no-build --pull never` 仅重建 MCP；此过程会结束内存会话。旧版也会恢复其已记录的截图／Unicode 限制。完整回退至 0.2.0 还需对应配置代次及双文件 Compose 设置。本次成功升级后没有执行回退演练。
+
+以下全部为历史部署记录，不代表当前容器清单或当前回退步骤。
+
+## 历史 0.2.0 部署
+
+正式环境于 2026-11-01 19:30:42 升级至 **0.2.0**，要求控制面轮询成功的健康检查及真实 ChatGPT SSH 通过；该阶段缓存工具列表未暴露 VNC 工具，因此没有宣称截图／输入验收完成。私有备份及证据保留于 `.cache/upgrade-0.2.0/`。
 
 ## 历史 0.1.1 部署
 
