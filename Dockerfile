@@ -1,5 +1,5 @@
 # Created by Yanjunhui
-FROM node:24-bookworm-slim AS node
+FROM node:25-bookworm-slim AS node
 
 FROM golang:1.26.10-bookworm AS build
 WORKDIR /src
