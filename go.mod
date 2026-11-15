@@ -8,9 +8,9 @@ require (
 	github.com/creack/pty v1.1.24
 	github.com/modelcontextprotocol/go-sdk v1.8.0
 	github.com/pkg/sftp v1.13.12
-	golang.org/x/crypto v0.58.0
-	golang.org/x/sys v0.49.0
-	golang.org/x/term v0.47.0
+	golang.org/x/crypto v0.59.0
+	golang.org/x/sys v0.50.0
+	golang.org/x/term v0.48.0
 )
 
 require (
